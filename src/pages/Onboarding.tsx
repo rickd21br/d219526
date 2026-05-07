@@ -11,6 +11,7 @@ import {
   KeyRound,
   Instagram,
   Lightbulb,
+  Bot,
 } from "lucide-react";
 import { useUser } from "@/hooks/useFinance";
 import { usePWAUpdate } from "@/hooks/usePWAUpdate";
