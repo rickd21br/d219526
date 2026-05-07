@@ -767,11 +767,15 @@ const Onboarding = () => {
                   <p className="mt-1 text-xs text-muted-foreground">
                     Buscando por novas atualizações.
                   </p>
-                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-border">
-                    <div
-                      className="h-full bg-primary transition-all duration-200"
-                      style={{ width: `${updateProgress}%` }}
-                    />
+                  <div className="mt-3 flex items-center justify-center gap-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <span
+                        key={i}
+                        className={`h-2.5 w-2.5 rounded-full transition-colors duration-300 ${
+                          i < updateProgress ? "bg-primary shadow-[0_0_8px_rgba(34,197,94,0.7)]" : "bg-border"
+                        }`}
+                      />
+                    ))}
                   </div>
                 </>
               )}
