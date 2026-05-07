@@ -1,4 +1,6 @@
-import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut } from "lucide-react";
+import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut, Sparkles, Bot, Smartphone, FileSpreadsheet, ClipboardCheck, PlayCircle, Gift } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUser, useJourney } from "@/hooks/useFinance";
 import { useTheme } from "@/hooks/useTheme";
 import { useStorage } from "@/hooks/useStorage";
@@ -22,6 +24,7 @@ export function TopBar() {
   const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useStorage<boolean>("d21.notifications", false);
   const navigate = useNavigate();
+  const [highlightsOpen, setHighlightsOpen] = useState(false);
 
   const initials =
     (user.name || "V")
@@ -69,8 +72,19 @@ export function TopBar() {
           )}
         </button>
 
-        {/* Menu */}
-        <DropdownMenu>
+        <div className="flex items-center gap-2">
+          {/* Highlights */}
+          <button
+            type="button"
+            onClick={() => setHighlightsOpen(true)}
+            aria-label="Destaques do plano"
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-soft transition-smooth hover:bg-secondary text-primary"
+          >
+            <Sparkles className="h-5 w-5" strokeWidth={2} />
+          </button>
+
+          {/* Menu */}
+          <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button
               type="button"
@@ -128,6 +142,7 @@ export function TopBar() {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        </div>
       </div>
 
       {/* User info bar */}
@@ -145,6 +160,32 @@ export function TopBar() {
           </div>
         </div>
       </div>
+
+      <Dialog open={highlightsOpen} onOpenChange={setHighlightsOpen}>
+        <DialogContent className="max-w-md rounded-3xl border border-primary/30 bg-background/70 backdrop-blur-xl shadow-floating">
+          <DialogHeader>
+            <DialogTitle className="text-center text-base font-bold">
+              Tudo o que você precisa para <span className="text-primary">EVOLUIR EM 21 DIAS</span>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-3 gap-3 pt-2">
+            {[
+              { Icon: Bot, title: "Mentor 24H", sub: "Nosso Agente de IA" },
+              { Icon: Smartphone, title: "App Exclusivo", sub: "Mobile e Desktop" },
+              { Icon: FileSpreadsheet, title: "Planilhas Financeiras", sub: "+ de 6000 Planilhas" },
+              { Icon: ClipboardCheck, title: "Checklists PRO", sub: "Protocolos Exclusivos" },
+              { Icon: PlayCircle, title: "Vídeo Aulas", sub: "Aprenda no seu tempo" },
+              { Icon: Gift, title: "Bônus Exclusivos", sub: "Brindes Surpresa" },
+            ].map(({ Icon, title, sub }) => (
+              <div key={title} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/20 bg-card/40 p-3 text-center backdrop-blur-sm">
+                <Icon className="h-8 w-8 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.6)]" strokeWidth={1.8} />
+                <p className="text-[11px] font-bold leading-tight">{title}</p>
+                <p className="text-[10px] leading-tight text-primary/90">{sub}</p>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
