@@ -400,7 +400,7 @@ const Onboarding = () => {
                   }`}
                 >
                   {showcaseIdx === 0 && (
-                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
+                    <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
                       Ajuda
                     </span>
                   )}
@@ -431,7 +431,7 @@ const Onboarding = () => {
                   }`}
                 >
                   {showcaseIdx === 1 && (
-                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
+                    <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
                       Atualizações
                     </span>
                   )}
@@ -463,7 +463,7 @@ const Onboarding = () => {
                   }`}
                 >
                   {showcaseIdx === 2 && (
-                    <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
+                    <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
                       Instalar app
                     </span>
                   )}
