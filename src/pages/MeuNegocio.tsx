@@ -251,15 +251,34 @@ const MeuNegocio = () => {
               <button onClick={() => setCat("produtos")} className="text-xs font-semibold text-blue-600">+ Adicionar</button>
             </div>
             <ul className="space-y-2">
-              {products.slice(0, 2).map((p) => <BizCard key={p.id} image={p.image} name={p.name} badge="Produto" badgeColor="emerald" lines={[`Estoque: — • Preço: ${fmtBRL(p.price)}`, `Margem: ${p.cost > 0 ? (((p.price - p.cost) / p.cost) * 100).toFixed(0) : 0}% • Receita: ${fmtBRL(p.price)}`]} />)}
-              {services.slice(0, 1).map((s) => <BizCard key={s.id} image={s.image} name={s.name} badge="Serviço" badgeColor="blue" lines={[`Tipo: ${s.type === "recorrente" ? "Recorrente" : "Único"} • Preço: ${fmtBRL(s.amount)}`, `Receita: ${fmtBRL(s.amount)}`]} />)}
-              {infos.slice(0, 1).map((i) => <BizCard key={i.id} image={i.image} name={i.name} badge="Infoproduto" badgeColor="violet" lines={[`Plataforma: ${i.platform} • Preço: ${fmtBRL(i.price)}`, `Vendas: — • Receita: ${fmtBRL(i.price)}`]} />)}
+              {products.slice(0, 2).map((p) => <BizCard key={p.id} image={p.image} name={p.name} badge="Produto" badgeColor="emerald" lines={[`Estoque: — • Preço: ${fmtBRL(p.price)}`, `Margem: ${p.cost > 0 ? (((p.price - p.cost) / p.cost) * 100).toFixed(0) : 0}% • Receita: ${fmtBRL(p.price)}`]} onEdit={() => setEditProd(p)} onDelete={() => { if (confirm("Excluir?")) removeProduct(p.id); }} />)}
+              {services.slice(0, 1).map((s) => <BizCard key={s.id} image={s.image} name={s.name} badge="Serviço" badgeColor="blue" lines={[`Tipo: ${s.type === "recorrente" ? "Recorrente" : "Único"} • Preço: ${fmtBRL(s.amount)}`, `Receita: ${fmtBRL(s.amount)}`]} onEdit={() => setEditServ(s)} onDelete={() => { if (confirm("Excluir?")) removeService(s.id); }} />)}
+              {infos.slice(0, 1).map((i) => <BizCard key={i.id} image={i.image} name={i.name} badge="Infoproduto" badgeColor="violet" lines={[`Plataforma: ${i.platform} • Preço: ${fmtBRL(i.price)}`, `Vendas: — • Receita: ${fmtBRL(i.price)}`]} onEdit={() => setEditInfo(i)} onDelete={() => { if (confirm("Excluir?")) removeInfo(i.id); }} />)}
               {totalAtivos === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum negócio ainda.</p>}
             </ul>
             {totalAtivos > 0 && (
-              <button className="mt-3 w-full rounded-2xl border border-border bg-card py-2.5 text-sm font-semibold">Ver todos os negócios</button>
+              <button onClick={() => setCat("produtos")} className="mt-3 w-full rounded-2xl border border-border bg-card py-2.5 text-sm font-semibold">Ver todos os negócios</button>
             )}
           </section>
+
+          <Dialog open={!!editProd} onOpenChange={(o) => !o && setEditProd(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Editar produto</DialogTitle></DialogHeader>
+              {editProd && <ProductForm initial={editProd} onSave={(p) => { updateProduct(p); setEditProd(null); toast.success("Atualizado"); }} />}
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!editServ} onOpenChange={(o) => !o && setEditServ(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Editar serviço</DialogTitle></DialogHeader>
+              {editServ && <ServiceForm initial={editServ} onSave={(s) => { updateService(s); setEditServ(null); toast.success("Atualizado"); }} />}
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!editInfo} onOpenChange={(o) => !o && setEditInfo(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Editar infoproduto</DialogTitle></DialogHeader>
+              {editInfo && <InfoForm initial={editInfo} platforms={platforms} onSave={(i) => { updateInfo(i); setEditInfo(null); toast.success("Atualizado"); }} />}
+            </DialogContent>
+          </Dialog>
         </div>
       ) : (
         <div className="space-y-3">
