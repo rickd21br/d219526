@@ -10,6 +10,7 @@ import {
   Lock,
   KeyRound,
   Instagram,
+  Lightbulb,
 } from "lucide-react";
 import { useUser } from "@/hooks/useFinance";
 import { usePWAUpdate } from "@/hooks/usePWAUpdate";
