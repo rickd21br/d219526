@@ -1,13 +1,18 @@
 import { MobileShell } from "@/components/MobileShell";
 import { useTransactions, useJourney, formatCurrency } from "@/hooks/useFinance";
+import { useStorage } from "@/hooks/useStorage";
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
 } from "recharts";
 import { useMemo } from "react";
 import { format, parseISO } from "date-fns";
-import { ArrowDownCircle, ArrowUpCircle, TrendingUp, Trophy, Sparkles } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, TrendingUp, Trophy, Sparkles, Package, Wrench, GraduationCap, Briefcase } from "lucide-react";
 import { JOURNEY_DAYS } from "@/data/journey";
+
+type BizProduct = { id: string; name: string; cost: number; price: number };
+type BizService = { id: string; name: string; amount: number };
+type BizInfo = { id: string; name: string; price: number; commissionType: "percent" | "fixed"; commission: number; platform: string };
 
 const COLORS = [
   "hsl(162 73% 38%)",
@@ -29,6 +34,27 @@ const COLOR_BALANCE = "hsl(217 91% 55%)"; // azul — confiança, saldo
 const Reports = () => {
   const { transactions, totals } = useTransactions();
   const { progress } = useJourney();
+  const [bizProducts] = useStorage<BizProduct[]>("d21.mn.products", []);
+  const [bizServices] = useStorage<BizService[]>("d21.mn.services", []);
+  const [bizInfos] = useStorage<BizInfo[]>("d21.mn.infoproducts", []);
+
+  const bizSummary = useMemo(() => {
+    const prodReceita = bizProducts.reduce((s, p) => s + p.price, 0);
+    const servReceita = bizServices.reduce((s, p) => s + p.amount, 0);
+    const infoReceita = bizInfos.reduce((s, p) => s + (p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission), 0);
+    const margens = bizProducts.filter((p) => p.cost > 0).map((p) => ((p.price - p.cost) / p.cost) * 100);
+    const margemMedia = margens.length ? margens.reduce((a, b) => a + b, 0) / margens.length : 0;
+    return {
+      total: bizProducts.length + bizServices.length + bizInfos.length,
+      receita: prodReceita + servReceita + infoReceita,
+      margemMedia,
+      byCat: [
+        { name: "Produtos", value: prodReceita, count: bizProducts.length },
+        { name: "Serviços", value: servReceita, count: bizServices.length },
+        { name: "Infoprodutos", value: infoReceita, count: bizInfos.length },
+      ],
+    };
+  }, [bizProducts, bizServices, bizInfos]);
 
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
@@ -323,6 +349,68 @@ const Reports = () => {
                 <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Dias registrados</div>
                 <div className="text-base font-bold text-foreground">{dailySeries.length}</div>
               </div>
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* Meus Negócios — relatório de ativos */}
+      <section className="mt-5 rounded-3xl bg-card p-5 shadow-soft">
+        <header className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Meus Negócios</h2>
+            <p className="text-xs text-muted-foreground">Receita potencial dos seus ativos</p>
+          </div>
+          <Briefcase className="h-5 w-5 text-primary" />
+        </header>
+
+        {bizSummary.total === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">Cadastre ativos em "Meu Negócio" para ver os relatórios.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-2xl bg-emerald-500/10 p-3 text-center">
+                <Package className="mx-auto h-4 w-4 text-emerald-600" />
+                <p className="mt-1 text-lg font-extrabold text-emerald-700">{bizSummary.byCat[0].count}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Produtos</p>
+              </div>
+              <div className="rounded-2xl bg-blue-500/10 p-3 text-center">
+                <Wrench className="mx-auto h-4 w-4 text-blue-600" />
+                <p className="mt-1 text-lg font-extrabold text-blue-700">{bizSummary.byCat[1].count}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Serviços</p>
+              </div>
+              <div className="rounded-2xl bg-violet-500/10 p-3 text-center">
+                <GraduationCap className="mx-auto h-4 w-4 text-violet-600" />
+                <p className="mt-1 text-lg font-extrabold text-violet-700">{bizSummary.byCat[2].count}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Infoprodutos</p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-xl bg-muted/40 p-3">
+                <p className="text-[10px] uppercase text-muted-foreground">Receita potencial</p>
+                <p className="text-base font-bold text-emerald-600">{formatCurrency(bizSummary.receita)}</p>
+              </div>
+              <div className="rounded-xl bg-muted/40 p-3">
+                <p className="text-[10px] uppercase text-muted-foreground">Margem média</p>
+                <p className="text-base font-bold text-primary">{bizSummary.margemMedia.toFixed(0)}%</p>
+              </div>
+            </div>
+
+            <div className="mt-4 h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={bizSummary.byCat} margin={{ top: 8, right: 8, bottom: 0, left: 4 }}>
+                  <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} opacity={0.5} />
+                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={56} tickFormatter={(v: number) => Math.abs(v) >= 1000 ? `R$${(v/1000).toFixed(1)}k` : `R$${v}`} />
+                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} maxBarSize={48}>
+                    {bizSummary.byCat.map((_, i) => (
+                      <Cell key={i} fill={["hsl(152 70% 42%)", "hsl(217 91% 55%)", "hsl(270 70% 55%)"][i]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </>
         )}

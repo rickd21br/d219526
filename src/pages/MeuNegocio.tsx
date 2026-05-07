@@ -141,9 +141,16 @@ type Cat = "produtos" | "servicos" | "info" | null;
 
 const MeuNegocio = () => {
   const [cat, setCat] = useState<Cat>(null);
-  const [products] = useStorage<Product[]>("d21.mn.products", []);
-  const [services] = useStorage<Service[]>("d21.mn.services", []);
-  const [infos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
+  const [addOpen, setAddOpen] = useState<Cat>(null);
+  const [products, setProducts] = useStorage<Product[]>("d21.mn.products", []);
+  const [services, setServices] = useStorage<Service[]>("d21.mn.services", []);
+  const [infos, setInfos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
+  const [extraPlatforms] = useStorage<string[]>("d21.mn.platforms", []);
+  const platforms = [...FIXED_PLATFORMS, ...extraPlatforms];
+
+  const addProduct = (p: Product) => { setProducts((prev) => [p, ...prev]); setAddOpen(null); toast.success("Produto adicionado"); };
+  const addService = (s: Service) => { setServices((prev) => [s, ...prev]); setAddOpen(null); toast.success("Serviço adicionado"); };
+  const addInfo = (i: Infoproduct) => { setInfos((prev) => [i, ...prev]); setAddOpen(null); toast.success("Infoproduto adicionado"); };
 
   const totalAtivos = products.length + services.length + infos.length;
   const receitaPotencial =
@@ -201,11 +208,30 @@ const MeuNegocio = () => {
           <section>
             <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">Meus ativos por categoria</p>
             <div className="grid grid-cols-3 gap-2">
-              <CatCard icon={<Package />} color="emerald" label="Produtos" count={products.length} onClick={() => setCat("produtos")} />
-              <CatCard icon={<Wrench />} color="blue" label="Serviços" count={services.length} onClick={() => setCat("servicos")} />
-              <CatCard icon={<GraduationCap />} color="violet" label="Infoprodutos" count={infos.length} onClick={() => setCat("info")} />
+              <CatCard icon={<Package />} color="emerald" label="Produtos" count={products.length} onOpen={() => setCat("produtos")} onAdd={() => setAddOpen("produtos")} />
+              <CatCard icon={<Wrench />} color="blue" label="Serviços" count={services.length} onOpen={() => setCat("servicos")} onAdd={() => setAddOpen("servicos")} />
+              <CatCard icon={<GraduationCap />} color="violet" label="Infoprodutos" count={infos.length} onOpen={() => setCat("info")} onAdd={() => setAddOpen("info")} />
             </div>
           </section>
+
+          <Dialog open={addOpen === "produtos"} onOpenChange={(o) => !o && setAddOpen(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Novo produto</DialogTitle></DialogHeader>
+              <ProductForm initial={null} onSave={addProduct} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={addOpen === "servicos"} onOpenChange={(o) => !o && setAddOpen(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Novo serviço</DialogTitle></DialogHeader>
+              <ServiceForm initial={null} onSave={addService} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={addOpen === "info"} onOpenChange={(o) => !o && setAddOpen(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Novo infoproduto</DialogTitle></DialogHeader>
+              <InfoForm initial={null} platforms={platforms} onSave={addInfo} />
+            </DialogContent>
+          </Dialog>
 
           <section>
             <div className="mb-2 flex items-center justify-between">
@@ -244,14 +270,16 @@ const CAT_COLORS: Record<string, string> = {
   violet: "bg-violet-500/15 text-violet-600",
 };
 
-function CatCard({ icon, color, label, count, onClick }: { icon: React.ReactNode; color: string; label: string; count: number; onClick: () => void }) {
+function CatCard({ icon, color, label, count, onOpen, onAdd }: { icon: React.ReactNode; color: string; label: string; count: number; onOpen: () => void; onAdd: () => void }) {
   return (
-    <button onClick={onClick} className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
-      <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", CAT_COLORS[color])}>{icon}</div>
-      <p className="text-xl font-extrabold">{count}</p>
-      <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
-      <span className="text-[10px] font-semibold text-blue-600">Ver todos</span>
-    </button>
+    <div className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
+      <button onClick={onOpen} className="flex flex-col items-center gap-1">
+        <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", CAT_COLORS[color])}>{icon}</div>
+        <p className="text-xl font-extrabold">{count}</p>
+        <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
+      </button>
+      <button onClick={onAdd} className="mt-1 w-full rounded-lg bg-blue-600/10 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-600/20">+ Adicionar</button>
+    </div>
   );
 }
 
