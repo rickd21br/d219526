@@ -357,11 +357,11 @@ const Onboarding = () => {
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2.25rem)" }}
       >
         {/* HEADER (logomarca alinhada à esquerda do conteúdo) */}
-        <header className="flex items-center">
+        <header className="flex w-full items-center justify-center">
           <img
             src={desafio21}
-            alt="Desafio 21 Dias - Disciplina hoje. Liberdade amanhã."
-            className="h-auto w-full max-w-[200px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)] sm:max-w-[230px]"
+            alt="D21App - Controle Financeiro Pro - Boletos Pagos V.2.1.1Br"
+            className="h-auto w-full max-w-[340px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)] sm:max-w-[420px]"
           />
         </header>
 
