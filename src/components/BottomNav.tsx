@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from "@/lib/router-compat";
 import { Home, Target, BarChart3, User, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AddTransactionDialog } from "./AddTransactionDialog";

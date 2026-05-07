@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { useTransactions, useJourney } from "@/hooks/useFinance";
 import { JOURNEY_DAYS } from "@/data/journey";
 import { Sparkles, BookOpen, ArrowRight, Trophy, Flame } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 
 /**
  * Mentor por capítulo. Quando o usuário ainda não iniciou, mostra Cerbasi (Cap. 1).

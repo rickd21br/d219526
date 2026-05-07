@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@/lib/router-compat";
 import { AddTransactionDialog } from "./AddTransactionDialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
