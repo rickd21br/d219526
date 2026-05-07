@@ -28,6 +28,8 @@ export function IceBreakerHero() {
   });
   const [playing, setPlaying] = useState(false);
   const [xpBurst, setXpBurst] = useState<number | null>(null);
+  const [positions, setPositions] = useStorage<Record<string, number>>("d21.iceBreakerPos", {});
+  const [resumePrompt, setResumePrompt] = useState<{ idx: number; saved: number } | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const current = ICE_BREAKER_AUDIOS[index];
