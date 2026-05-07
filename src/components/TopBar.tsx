@@ -1,6 +1,13 @@
-import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut, Sparkles, Bot, Smartphone, FileSpreadsheet, ClipboardCheck, PlayCircle, Gift } from "lucide-react";
+import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut } from "lucide-react";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import triggerIcon from "@/assets/highlights/trigger.png";
+import mentorIcon from "@/assets/highlights/mentor.png";
+import appIcon from "@/assets/highlights/app.png";
+import planilhasIcon from "@/assets/highlights/planilhas.png";
+import checklistsIcon from "@/assets/highlights/checklists.png";
+import videoaulasIcon from "@/assets/highlights/videoaulas.png";
+import bonusIcon from "@/assets/highlights/bonus.png";
 import { useUser, useJourney } from "@/hooks/useFinance";
 import { useTheme } from "@/hooks/useTheme";
 import { useStorage } from "@/hooks/useStorage";
