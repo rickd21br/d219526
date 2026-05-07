@@ -752,29 +752,6 @@ const Onboarding = () => {
           </form>
         )}
 
-        {/* FOOTER */}
-        <footer className="mt-auto pt-8">
-          <ul className="grid grid-cols-3 gap-2 text-center">
-            <li className="flex flex-col items-center gap-1.5">
-              <Wallet className="h-4 w-4 text-white/85" />
-              <span className="text-[10px] leading-tight text-white/75">
-                Controle total das suas finanças
-              </span>
-            </li>
-            <li className="flex flex-col items-center gap-1.5">
-              <ShieldCheck className="h-4 w-4 text-white/85" />
-              <span className="text-[10px] leading-tight text-white/75">
-                Segurança e privacidade
-              </span>
-            </li>
-            <li className="flex flex-col items-center gap-1.5">
-              <BarChart3 className="h-4 w-4 text-white/85" />
-              <span className="text-[10px] leading-tight text-white/75">
-                Relatórios claros e objetivos
-              </span>
-            </li>
-          </ul>
-        </footer>
       </div>
 
       {/* ============ UPDATE MODAL ============ */}
