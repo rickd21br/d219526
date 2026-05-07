@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { useStorage } from "@/hooks/useStorage";
-import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon, ChevronLeft, Package, Wrench, GraduationCap, Sprout, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
