@@ -314,10 +314,16 @@ function CatCard({ icon, color, label, count, onOpen, onAdd }: { icon: React.Rea
   );
 }
 
-function BizCard({ image, name, badge, badgeColor, lines }: { image?: string; name: string; badge: string; badgeColor: string; lines: string[] }) {
+function BizCard({ image, name, badge, badgeColor, lines, onEdit, onDelete, onView }: { image?: string; name: string; badge: string; badgeColor: string; lines: string[]; onEdit?: () => void; onDelete?: () => void; onView?: () => void }) {
   return (
-    <li className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
-      {image ? <img src={image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className={cn("flex h-14 w-14 items-center justify-center rounded-xl", CAT_COLORS[badgeColor])}><Briefcase className="h-5 w-5" /></div>}
+    <li className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
+      {image ? (
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40">
+          <img src={image} alt="" className="max-h-full max-w-full object-contain" />
+        </div>
+      ) : (
+        <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-xl", CAT_COLORS[badgeColor])}><Briefcase className="h-5 w-5" /></div>
+      )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-bold">{name}</p>
@@ -325,6 +331,18 @@ function BizCard({ image, name, badge, badgeColor, lines }: { image?: string; na
         </div>
         {lines.map((l, i) => <p key={i} className="truncate text-xs text-muted-foreground">{l}</p>)}
       </div>
+      {(onEdit || onDelete || onView) && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><MoreVertical className="h-4 w-4" /></button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onView && <DropdownMenuItem onClick={onView}><Eye className="mr-2 h-4 w-4" />Visualizar</DropdownMenuItem>}
+            {onEdit && <DropdownMenuItem onClick={onEdit}><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>}
+            {onDelete && <DropdownMenuItem onClick={onDelete} className="text-red-500"><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </li>
   );
 }
