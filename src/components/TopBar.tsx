@@ -24,6 +24,7 @@ export function TopBar() {
   const { theme, toggleTheme } = useTheme();
   const [notifications, setNotifications] = useStorage<boolean>("d21.notifications", false);
   const navigate = useNavigate();
+  const [highlightsOpen, setHighlightsOpen] = useState(false);
 
   const initials =
     (user.name || "V")
