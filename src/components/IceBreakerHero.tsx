@@ -53,6 +53,12 @@ export function IceBreakerHero() {
     if (!a) return;
     try {
       if (a.paused) {
+        // Se há posição salva e ainda não tocou, oferecer retomar
+        const saved = positions[current.id] ?? 0;
+        if (saved > 5 && a.currentTime < 1 && !isCompleted(current.id)) {
+          setResumePrompt({ idx: index, saved });
+          return;
+        }
         await a.play();
         setPlaying(true);
       } else {
@@ -64,12 +70,20 @@ export function IceBreakerHero() {
     }
   };
 
+  const resumeFrom = (fromTime: number) => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.currentTime = fromTime;
+    a.play().then(() => setPlaying(true)).catch(() => toast.error("Não consegui retomar."));
+  };
+
   const onTime = () => {
     const a = audioRef.current;
     if (!a || !a.duration || !isFinite(a.duration)) return;
     const ratio = a.currentTime / a.duration;
     const wasDone = isCompleted(current.id);
     setProgress(current.id, ratio);
+    setPositions((p) => ({ ...p, [current.id]: a.currentTime }));
     if (ratio >= 0.95 && !wasDone) {
       // XP burst dentro do card (sem toast global)
       setXpBurst(15);
