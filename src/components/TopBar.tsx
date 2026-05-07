@@ -1,4 +1,6 @@
-import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut } from "lucide-react";
+import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut, Sparkles, Bot, Smartphone, FileSpreadsheet, ClipboardCheck, PlayCircle, Gift } from "lucide-react";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useUser, useJourney } from "@/hooks/useFinance";
 import { useTheme } from "@/hooks/useTheme";
 import { useStorage } from "@/hooks/useStorage";
