@@ -337,7 +337,7 @@ const Onboarding = () => {
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2.5rem)" }}
       >
         {/* HEADER (apenas a logomarca dourada, alinhada à esquerda do container) */}
-        <header className="-ml-2 flex items-center sm:-ml-3">
+        <header className="-ml-5 flex items-center sm:-ml-6">
           <img
             src={desafio21}
             alt="Desafio 21 Dias - Disciplina hoje. Liberdade amanhã."
