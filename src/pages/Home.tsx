@@ -86,6 +86,9 @@ const Home = () => {
       {/* MENTOR DO PROGRESSO ONLINE — primeiro acesso */}
       <IceBreakerHero />
 
+      {/* DICA DO DIA */}
+      <DailyTip />
+
       {/* SALDO */}
       <section className="relative mt-5 overflow-hidden rounded-3xl gradient-card p-6 text-primary-foreground shadow-elevated">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
