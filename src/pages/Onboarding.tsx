@@ -374,7 +374,7 @@ const Onboarding = () => {
           />
           <p className="flex items-center gap-2 text-[12px] leading-snug text-white/75">
             <Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            Confirme seus dados para personalizar sua experiência no app.
+            Preencha os dados abaixo para acessar o app.
           </p>
         </div>
 
