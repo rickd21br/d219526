@@ -28,6 +28,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import logoD21 from "@/assets/logo-d21.png";
+import headlineFuturo from "@/assets/headline-futuro.png";
 import desafio21 from "@/assets/desafio-21-dias.png";
 import googleLogo from "@/assets/google-logo.png";
 import appleLogo from "@/assets/apple-logo.png";
@@ -366,14 +367,11 @@ const Onboarding = () => {
 
         {/* HEADLINE */}
         <div className="-mt-2 space-y-2">
-          <h1 className="font-display text-[22px] font-normal leading-[1.05] tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)] sm:text-[24px]">
-            O FUTURO QUE VOCÊ QUER
-            <br />
-            COMEÇA <span className="text-accent">COM UMA DECISÃO.</span>
-          </h1>
-          <p className="font-display text-[15px] leading-tight tracking-wide text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
-            Disciplina hoje. Liberdade amanhã.
-          </p>
+          <img
+            src={headlineFuturo}
+            alt="O futuro que você quer começa com uma decisão. Disciplina hoje. Liberdade amanhã."
+            className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]"
+          />
           <p className="flex items-center gap-2 text-[12px] leading-snug text-white/75">
             <Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden />
             Confirme seus dados para personalizar sua experiência no app.
