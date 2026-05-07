@@ -58,6 +58,12 @@ const Reports = () => {
     };
   }, [bizProducts, bizServices, bizInfos]);
 
+  const displayTotals = useMemo(() => {
+    if (!incorporate) return totals;
+    const extra = bizSummary.receita;
+    return { income: totals.income + extra, expense: totals.expense, balance: totals.balance + extra };
+  }, [incorporate, totals, bizSummary.receita]);
+
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
     transactions.filter((t) => t.type === "expense").forEach((t) => {
