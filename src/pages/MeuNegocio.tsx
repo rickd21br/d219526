@@ -149,9 +149,20 @@ const MeuNegocio = () => {
   const [extraPlatforms] = useStorage<string[]>("d21.mn.platforms", []);
   const platforms = [...FIXED_PLATFORMS, ...extraPlatforms];
 
-  const addProduct = (p: Product) => { setProducts((prev) => [p, ...prev]); setAddOpen(null); toast.success("Produto adicionado"); };
-  const addService = (s: Service) => { setServices((prev) => [s, ...prev]); setAddOpen(null); toast.success("Serviço adicionado"); };
-  const addInfo = (i: Infoproduct) => { setInfos((prev) => [i, ...prev]); setAddOpen(null); toast.success("Infoproduto adicionado"); };
+  const addProduct = (p: Product) => { setProducts((prev) => prev.some((x) => x.id === p.id) ? prev.map((x) => x.id === p.id ? p : x) : [p, ...prev]); setAddOpen(null); toast.success("Produto adicionado"); };
+  const addService = (s: Service) => { setServices((prev) => prev.some((x) => x.id === s.id) ? prev.map((x) => x.id === s.id ? s : x) : [s, ...prev]); setAddOpen(null); toast.success("Serviço adicionado"); };
+  const addInfo = (i: Infoproduct) => { setInfos((prev) => prev.some((x) => x.id === i.id) ? prev.map((x) => x.id === i.id ? i : x) : [i, ...prev]); setAddOpen(null); toast.success("Infoproduto adicionado"); };
+
+  const updateProduct = (p: Product) => setProducts((prev) => prev.map((x) => x.id === p.id ? p : x));
+  const updateService = (s: Service) => setServices((prev) => prev.map((x) => x.id === s.id ? s : x));
+  const updateInfo = (i: Infoproduct) => setInfos((prev) => prev.map((x) => x.id === i.id ? i : x));
+  const removeProduct = (id: string) => setProducts((prev) => prev.filter((x) => x.id !== id));
+  const removeService = (id: string) => setServices((prev) => prev.filter((x) => x.id !== id));
+  const removeInfo = (id: string) => setInfos((prev) => prev.filter((x) => x.id !== id));
+
+  const [editProd, setEditProd] = useState<Product | null>(null);
+  const [editServ, setEditServ] = useState<Service | null>(null);
+  const [editInfo, setEditInfo] = useState<Infoproduct | null>(null);
 
   const totalAtivos = products.length + services.length + infos.length;
   const receitaPotencial =
