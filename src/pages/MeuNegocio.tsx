@@ -1,12 +1,12 @@
 import { useMemo, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { useStorage } from "@/hooks/useStorage";
-import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon, ChevronLeft, Package, Wrench, GraduationCap, Sprout, Volume2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+// tabs removed: now using card-based navigation
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -137,32 +137,138 @@ function parseCSV(text: string): Record<string, string>[] {
 }
 
 // ============================================================
+type Cat = "produtos" | "servicos" | "info" | null;
+
 const MeuNegocio = () => {
+  const [cat, setCat] = useState<Cat>(null);
+  const [products] = useStorage<Product[]>("d21.mn.products", []);
+  const [services] = useStorage<Service[]>("d21.mn.services", []);
+  const [infos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
+
+  const totalAtivos = products.length + services.length + infos.length;
+  const receitaPotencial =
+    products.reduce((s, p) => s + p.price, 0) +
+    services.reduce((s, x) => s + x.amount, 0) +
+    infos.reduce((s, x) => s + x.price, 0);
+  const margens = products.filter((p) => p.cost > 0).map((p) => ((p.price - p.cost) / p.cost) * 100);
+  const margemMedia = margens.length ? margens.reduce((a, b) => a + b, 0) / margens.length : 0;
+
   return (
     <MobileShell>
-      <header className="mb-4 flex items-center gap-3">
-        <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-lg">
-          <Briefcase className="h-5 w-5" />
-        </div>
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-wide text-blue-500">Gestão</p>
-          <h1 className="text-lg font-bold">Meu Negócio</h1>
-        </div>
-      </header>
+      {cat === null ? (
+        <div className="space-y-4">
+          <header className="flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-base font-extrabold leading-tight">Construa seus ativos.</h1>
+              <p className="text-sm text-muted-foreground">Crie fontes de renda. Conquiste liberdade.</p>
+            </div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600"><Sprout className="h-6 w-6" /></div>
+          </header>
 
-      <Tabs defaultValue="produtos" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="produtos">Produtos</TabsTrigger>
-          <TabsTrigger value="servicos">Serviços</TabsTrigger>
-          <TabsTrigger value="info">Infoprodutos</TabsTrigger>
-        </TabsList>
-        <TabsContent value="produtos" className="mt-4"><ProdutosTab /></TabsContent>
-        <TabsContent value="servicos" className="mt-4"><ServicosTab /></TabsContent>
-        <TabsContent value="info" className="mt-4"><InfoTab /></TabsContent>
-      </Tabs>
+          <section className="rounded-2xl border border-border bg-card p-4 shadow-soft">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold uppercase text-muted-foreground">Resumo dos seus negócios</p>
+              <button className="text-xs font-semibold text-blue-600">Ver relatório</button>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              <div>
+                <p className="text-[10px] uppercase text-muted-foreground">Negócios ativos</p>
+                <p className="text-xl font-extrabold">{totalAtivos}</p>
+                <p className="text-[10px] text-emerald-600">+2 este mês</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-muted-foreground">Receita potencial/mês</p>
+                <p className="text-xl font-extrabold">{fmtBRL(receitaPotencial)}</p>
+                <p className="text-[10px] text-muted-foreground">Projeção</p>
+              </div>
+              <div>
+                <p className="text-[10px] uppercase text-muted-foreground">Margem média</p>
+                <p className="text-xl font-extrabold">{margemMedia.toFixed(0)}%</p>
+                <p className="text-[10px] text-emerald-600">{margemMedia >= 30 ? "Muito bom" : "Atenção"}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/15 text-blue-600 text-xs font-bold">GC</div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-bold uppercase text-blue-600">DICA DO DIA <span className="text-muted-foreground">• Gustavo Cerbasi</span></p>
+              <p className="truncate text-xs">"Planeje hoje o ativo que vai gerar liberdade amanhã."</p>
+            </div>
+            <button className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500 text-white"><Volume2 className="h-4 w-4" /></button>
+          </section>
+
+          <section>
+            <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">Meus ativos por categoria</p>
+            <div className="grid grid-cols-3 gap-2">
+              <CatCard icon={<Package />} color="emerald" label="Produtos" count={products.length} onClick={() => setCat("produtos")} />
+              <CatCard icon={<Wrench />} color="blue" label="Serviços" count={services.length} onClick={() => setCat("servicos")} />
+              <CatCard icon={<GraduationCap />} color="violet" label="Infoprodutos" count={infos.length} onClick={() => setCat("info")} />
+            </div>
+          </section>
+
+          <section>
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-bold uppercase text-muted-foreground">Seus negócios</p>
+              <button onClick={() => setCat("produtos")} className="text-xs font-semibold text-blue-600">+ Adicionar</button>
+            </div>
+            <ul className="space-y-2">
+              {products.slice(0, 2).map((p) => <BizCard key={p.id} image={p.image} name={p.name} badge="Produto" badgeColor="emerald" lines={[`Estoque: — • Preço: ${fmtBRL(p.price)}`, `Margem: ${p.cost > 0 ? (((p.price - p.cost) / p.cost) * 100).toFixed(0) : 0}% • Receita: ${fmtBRL(p.price)}`]} />)}
+              {services.slice(0, 1).map((s) => <BizCard key={s.id} image={s.image} name={s.name} badge="Serviço" badgeColor="blue" lines={[`Tipo: ${s.type === "recorrente" ? "Recorrente" : "Único"} • Preço: ${fmtBRL(s.amount)}`, `Receita: ${fmtBRL(s.amount)}`]} />)}
+              {infos.slice(0, 1).map((i) => <BizCard key={i.id} image={i.image} name={i.name} badge="Infoproduto" badgeColor="violet" lines={[`Plataforma: ${i.platform} • Preço: ${fmtBRL(i.price)}`, `Vendas: — • Receita: ${fmtBRL(i.price)}`]} />)}
+              {totalAtivos === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum negócio ainda.</p>}
+            </ul>
+            {totalAtivos > 0 && (
+              <button className="mt-3 w-full rounded-2xl border border-border bg-card py-2.5 text-sm font-semibold">Ver todos os negócios</button>
+            )}
+          </section>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          <header className="flex items-center gap-2">
+            <button onClick={() => setCat(null)} className="rounded-lg p-1.5 hover:bg-muted"><ChevronLeft className="h-5 w-5" /></button>
+            <h1 className="text-lg font-bold capitalize">{cat === "info" ? "Infoprodutos" : cat}</h1>
+          </header>
+          {cat === "produtos" && <ProdutosTab />}
+          {cat === "servicos" && <ServicosTab />}
+          {cat === "info" && <InfoTab />}
+        </div>
+      )}
     </MobileShell>
   );
 };
+
+const CAT_COLORS: Record<string, string> = {
+  emerald: "bg-emerald-500/15 text-emerald-600",
+  blue: "bg-blue-500/15 text-blue-600",
+  violet: "bg-violet-500/15 text-violet-600",
+};
+
+function CatCard({ icon, color, label, count, onClick }: { icon: React.ReactNode; color: string; label: string; count: number; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
+      <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", CAT_COLORS[color])}>{icon}</div>
+      <p className="text-xl font-extrabold">{count}</p>
+      <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
+      <span className="text-[10px] font-semibold text-blue-600">Ver todos</span>
+    </button>
+  );
+}
+
+function BizCard({ image, name, badge, badgeColor, lines }: { image?: string; name: string; badge: string; badgeColor: string; lines: string[] }) {
+  return (
+    <li className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
+      {image ? <img src={image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className={cn("flex h-14 w-14 items-center justify-center rounded-xl", CAT_COLORS[badgeColor])}><Briefcase className="h-5 w-5" /></div>}
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <p className="truncate text-sm font-bold">{name}</p>
+          <span className={cn("rounded-md px-1.5 py-0.5 text-[9px] font-bold uppercase", CAT_COLORS[badgeColor])}>{badge}</span>
+        </div>
+        {lines.map((l, i) => <p key={i} className="truncate text-xs text-muted-foreground">{l}</p>)}
+      </div>
+    </li>
+  );
+}
 
 // =================== PRODUTOS ===================
 function ProdutosTab() {
