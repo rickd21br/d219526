@@ -706,6 +706,108 @@ const Onboarding = () => {
         </footer>
       </div>
 
+      {/* ============ UPDATE MODAL ============ */}
+      {updateOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-5 animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            aria-label="Fechar"
+            onClick={closeUpdateModal}
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          />
+          <div className="relative w-full max-w-sm rounded-3xl border border-white/15 bg-card p-6 shadow-floating animate-bounce-in">
+            <button
+              type="button"
+              aria-label="Fechar"
+              onClick={closeUpdateModal}
+              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-muted/70"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              <img
+                src={logoD21}
+                alt="D21"
+                className="h-16 w-16 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+              />
+              <h2 className="mt-3 text-lg font-bold text-foreground">D21 App</h2>
+              <p className="text-xs font-semibold text-primary">Boletos Pagos</p>
+              <p className="mt-0.5 text-[11px] tracking-wide text-muted-foreground">
+                BUILD V 2.0 {APP_VERSION}
+              </p>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-border bg-muted/40 p-4 text-center">
+              {updatePhase === "checking" && (
+                <>
+                  <p className="text-sm font-semibold text-foreground">Por gentileza aguarde...</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Buscando por novas atualizações.
+                  </p>
+                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-border">
+                    <div
+                      className="h-full bg-primary transition-all duration-200"
+                      style={{ width: `${updateProgress}%` }}
+                    />
+                  </div>
+                </>
+              )}
+              {updatePhase === "updated" && (
+                <>
+                  <p className="text-sm font-semibold text-foreground">Tudo certo! ✅</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Você já está na versão mais recente
+                    <br />
+                    <span className="font-mono text-foreground/80">v{APP_VERSION}</span>.
+                  </p>
+                </>
+              )}
+              {updatePhase === "available" && (
+                <>
+                  <p className="text-sm font-semibold text-foreground">
+                    Nova versão disponível! 🎉
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Atualize agora para receber as últimas melhorias.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {updatePhase === "available" ? (
+              <div className="mt-4 flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={closeUpdateModal}
+                  className="h-11 flex-1 rounded-2xl"
+                >
+                  Depois
+                </Button>
+                <Button
+                  onClick={confirmUpdate}
+                  className="h-11 flex-1 rounded-2xl bg-primary font-semibold text-primary-foreground"
+                >
+                  Atualizar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={closeUpdateModal}
+                disabled={updatePhase === "checking"}
+                className="mt-4 h-11 w-full rounded-2xl bg-primary font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                Fechar
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ============ TUTORIAL POPUP ============ */}
       {tutorialOpen && (
         <div
