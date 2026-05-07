@@ -1,6 +1,7 @@
 import { MobileShell } from "@/components/MobileShell";
 import { useTransactions, useJourney, formatCurrency } from "@/hooks/useFinance";
 import { useStorage } from "@/hooks/useStorage";
+import { Switch } from "@/components/ui/switch";
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
@@ -37,6 +38,7 @@ const Reports = () => {
   const [bizProducts] = useStorage<BizProduct[]>("d21.mn.products", []);
   const [bizServices] = useStorage<BizService[]>("d21.mn.services", []);
   const [bizInfos] = useStorage<BizInfo[]>("d21.mn.infoproducts", []);
+  const [incorporate, setIncorporate] = useStorage<boolean>("d21.mn.incorporate", false);
 
   const bizSummary = useMemo(() => {
     const prodReceita = bizProducts.reduce((s, p) => s + p.price, 0);
@@ -55,6 +57,12 @@ const Reports = () => {
       ],
     };
   }, [bizProducts, bizServices, bizInfos]);
+
+  const displayTotals = useMemo(() => {
+    if (!incorporate) return totals;
+    const extra = bizSummary.receita;
+    return { income: totals.income + extra, expense: totals.expense, balance: totals.balance + extra };
+  }, [incorporate, totals, bizSummary.receita]);
 
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
@@ -172,7 +180,7 @@ const Reports = () => {
             <ArrowUpCircle className="h-3 w-3" /> Entradas
           </div>
           <div className="mt-1 text-sm font-bold" style={{ color: COLOR_INCOME }}>
-            {formatCurrency(totals.income)}
+            {formatCurrency(displayTotals.income)}
           </div>
         </div>
         <div
@@ -183,14 +191,14 @@ const Reports = () => {
             <ArrowDownCircle className="h-3 w-3" /> Saídas
           </div>
           <div className="mt-1 text-sm font-bold" style={{ color: COLOR_EXPENSE }}>
-            {formatCurrency(totals.expense)}
+            {formatCurrency(displayTotals.expense)}
           </div>
         </div>
         <div
           className="rounded-2xl p-3 shadow-soft"
           style={{
-            background: `linear-gradient(135deg, ${totals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}22, transparent)`,
-            border: `1px solid ${totals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}33`,
+            background: `linear-gradient(135deg, ${displayTotals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}22, transparent)`,
+            border: `1px solid ${displayTotals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}33`,
           }}
         >
           <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -198,9 +206,9 @@ const Reports = () => {
           </div>
           <div
             className="mt-1 text-sm font-bold"
-            style={{ color: totals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE }}
+            style={{ color: displayTotals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE }}
           >
-            {formatCurrency(totals.balance)}
+            {formatCurrency(displayTotals.balance)}
           </div>
         </div>
       </section>
@@ -363,6 +371,14 @@ const Reports = () => {
           </div>
           <Briefcase className="h-5 w-5 text-primary" />
         </header>
+
+        <div className="mb-3 flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2">
+          <div>
+            <p className="text-xs font-semibold">Incorporar saldo dos negócios</p>
+            <p className="text-[10px] text-muted-foreground">Soma a receita dos ativos ao saldo geral</p>
+          </div>
+          <Switch checked={incorporate} onCheckedChange={setIncorporate} />
+        </div>
 
         {bizSummary.total === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">Cadastre ativos em "Meu Negócio" para ver os relatórios.</p>

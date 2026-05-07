@@ -1,5 +1,5 @@
 import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import triggerIcon from "@/assets/highlights/trigger.png";
 import mentorIcon from "@/assets/highlights/mentor.png";
@@ -32,6 +32,16 @@ export function TopBar() {
   const [notifications, setNotifications] = useStorage<boolean>("d21.notifications", false);
   const navigate = useNavigate();
   const [highlightsOpen, setHighlightsOpen] = useState(false);
+  const [mentorOpen, setMentorOpen] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      (window as any).__d21PWAPrompt = e;
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
 
   const initials =
     (user.name || "V")
@@ -169,17 +179,36 @@ export function TopBar() {
       </div>
 
       <Dialog open={highlightsOpen} onOpenChange={setHighlightsOpen}>
-        <DialogContent className="max-w-md rounded-3xl border border-primary/40 bg-background/70 backdrop-blur-xl shadow-floating">
+        <DialogContent className="max-w-md rounded-3xl border border-primary/40 bg-background/70 backdrop-blur-xl shadow-floating data-[state=open]:animate-in data-[state=open]:slide-in-from-top-1/2 data-[state=open]:fade-in-0 data-[state=open]:duration-500">
           <div className="grid grid-cols-3 gap-x-2 gap-y-5 pt-2 divide-x divide-y-0 divide-primary/20">
             {[
-              { icon: mentorIcon, title: "Mentor 24H", sub: "Nosso Agente de IA" },
-              { icon: appIcon, title: "App Exclusivo", sub: "Mobile e Desktop" },
-              { icon: planilhasIcon, title: "Planilhas Financeiras", sub: "+ de 6000 Planilhas" },
-              { icon: checklistsIcon, title: "Checklists PRO", sub: "Protocolos Exclusivos" },
-              { icon: videoaulasIcon, title: "Vídeo Aulas", sub: "Aprenda no seu tempo" },
-              { icon: bonusIcon, title: "Bônus Exclusivos", sub: "Brindes Surpresa." },
-            ].map(({ icon, title, sub }) => (
-              <div key={title} className="flex flex-col items-center gap-1.5 px-2 text-center">
+              { icon: mentorIcon, title: "Mentor 24H", sub: "Nosso Agente de IA", action: "mentor" as const },
+              { icon: appIcon, title: "App Exclusivo", sub: "Mobile e Desktop", action: "pwa" as const },
+              { icon: planilhasIcon, title: "Planilhas Financeiras", sub: "+ de 6000 Planilhas", action: "soon" as const },
+              { icon: checklistsIcon, title: "Checklists PRO", sub: "Protocolos Exclusivos", action: "soon" as const },
+              { icon: videoaulasIcon, title: "Vídeo Aulas", sub: "Aprenda no seu tempo", action: "soon" as const },
+              { icon: bonusIcon, title: "Bônus Exclusivos", sub: "Brindes Surpresa.", action: "bonus" as const },
+            ].map(({ icon, title, sub, action }) => (
+              <button
+                type="button"
+                key={title}
+                onClick={() => {
+                  setHighlightsOpen(false);
+                  if (action === "mentor") setMentorOpen(true);
+                  else if (action === "bonus") navigate("/audios");
+                  else if (action === "pwa") {
+                    const ev = (window as any).__d21PWAPrompt;
+                    if (ev && typeof ev.prompt === "function") {
+                      ev.prompt();
+                    } else {
+                      toast.info("Para instalar, use o menu do navegador → 'Adicionar à tela inicial'.");
+                    }
+                  } else {
+                    toast.info(`${title}: Em breve`);
+                  }
+                }}
+                className="flex flex-col items-center gap-1.5 px-2 text-center transition-smooth hover:opacity-80"
+              >
                 <img
                   src={icon}
                   alt=""
@@ -188,12 +217,35 @@ export function TopBar() {
                 />
                 <p className="text-[12px] font-bold leading-tight">{title}</p>
                 <p className="text-[10px] leading-tight text-primary">{sub}</p>
-              </div>
+              </button>
             ))}
           </div>
           <DialogTitle className="pt-2 text-center text-[11px] font-semibold tracking-[0.18em] text-foreground/90">
             TUDO O QUE VOCÊ PRECISA PARA <span className="text-primary">EVOLUIR EM 21 DIAS.</span>
           </DialogTitle>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={mentorOpen} onOpenChange={setMentorOpen}>
+        <DialogContent className="max-w-sm rounded-3xl">
+          <DialogHeader>
+            <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+              <img src={mentorIcon} alt="" className="h-12 w-12" />
+            </div>
+            <DialogTitle className="text-center">Mentor 24 Horas</DialogTitle>
+          </DialogHeader>
+          <p className="text-center text-sm text-muted-foreground">
+            Converse com o <strong className="text-foreground">Mentor do Progresso</strong> a qualquer hora.
+            Seu conselheiro pessoal de IA está pronto para te ajudar.
+          </p>
+          <a
+            href="https://chatgpt.com/g/g-687434b4fafc81919ae1d9e27d48d27f-o-conselheiro-do-progresso"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 flex h-12 items-center justify-center rounded-2xl gradient-primary font-semibold text-primary-foreground shadow-glow"
+          >
+            Falar com o Mentor do Progresso
+          </a>
         </DialogContent>
       </Dialog>
     </header>
