@@ -1,5 +1,5 @@
 import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import triggerIcon from "@/assets/highlights/trigger.png";
 import mentorIcon from "@/assets/highlights/mentor.png";
