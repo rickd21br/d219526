@@ -72,7 +72,21 @@ const Onboarding = () => {
   // Showcase dos 3 botões superiores (Ajuda, Atualizações, Instalar app)
   // -1 = inativo; 0..2 = botão em destaque
   const [showcaseIdx, setShowcaseIdx] = useState<number>(-1);
+  const [hoverIdx, setHoverIdx] = useState<number>(-1);
   const showcaseAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  const playShowcaseSound = () => {
+    try {
+      if (!showcaseAudioRef.current) {
+        showcaseAudioRef.current = new Audio(SHOWCASE_AUDIO);
+        showcaseAudioRef.current.volume = 0.6;
+      }
+      showcaseAudioRef.current.currentTime = 0;
+      void showcaseAudioRef.current.play().catch(() => {});
+    } catch {
+      /* ignore */
+    }
+  };
 
   // PIN — criação
   const [pin, setPin] = useState("");
