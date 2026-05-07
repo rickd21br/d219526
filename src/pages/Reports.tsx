@@ -353,6 +353,68 @@ const Reports = () => {
           </>
         )}
       </section>
+
+      {/* Meus Negócios — relatório de ativos */}
+      <section className="mt-5 rounded-3xl bg-card p-5 shadow-soft">
+        <header className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Meus Negócios</h2>
+            <p className="text-xs text-muted-foreground">Receita potencial dos seus ativos</p>
+          </div>
+          <Briefcase className="h-5 w-5 text-primary" />
+        </header>
+
+        {bizSummary.total === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">Cadastre ativos em "Meu Negócio" para ver os relatórios.</p>
+        ) : (
+          <>
+            <div className="grid grid-cols-3 gap-2">
+              <div className="rounded-2xl bg-emerald-500/10 p-3 text-center">
+                <Package className="mx-auto h-4 w-4 text-emerald-600" />
+                <p className="mt-1 text-lg font-extrabold text-emerald-700">{bizSummary.byCat[0].count}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Produtos</p>
+              </div>
+              <div className="rounded-2xl bg-blue-500/10 p-3 text-center">
+                <Wrench className="mx-auto h-4 w-4 text-blue-600" />
+                <p className="mt-1 text-lg font-extrabold text-blue-700">{bizSummary.byCat[1].count}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Serviços</p>
+              </div>
+              <div className="rounded-2xl bg-violet-500/10 p-3 text-center">
+                <GraduationCap className="mx-auto h-4 w-4 text-violet-600" />
+                <p className="mt-1 text-lg font-extrabold text-violet-700">{bizSummary.byCat[2].count}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Infoprodutos</p>
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-2">
+              <div className="rounded-xl bg-muted/40 p-3">
+                <p className="text-[10px] uppercase text-muted-foreground">Receita potencial</p>
+                <p className="text-base font-bold text-emerald-600">{formatCurrency(bizSummary.receita)}</p>
+              </div>
+              <div className="rounded-xl bg-muted/40 p-3">
+                <p className="text-[10px] uppercase text-muted-foreground">Margem média</p>
+                <p className="text-base font-bold text-primary">{bizSummary.margemMedia.toFixed(0)}%</p>
+              </div>
+            </div>
+
+            <div className="mt-4 h-56">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={bizSummary.byCat} margin={{ top: 8, right: 8, bottom: 0, left: 4 }}>
+                  <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} opacity={0.5} />
+                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={56} tickFormatter={(v: number) => Math.abs(v) >= 1000 ? `R$${(v/1000).toFixed(1)}k` : `R$${v}`} />
+                  <Tooltip formatter={(v: number) => formatCurrency(v)} />
+                  <Bar dataKey="value" radius={[8, 8, 0, 0]} maxBarSize={48}>
+                    {bizSummary.byCat.map((_, i) => (
+                      <Cell key={i} fill={["hsl(152 70% 42%)", "hsl(217 91% 55%)", "hsl(270 70% 55%)"][i]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </>
+        )}
+      </section>
     </MobileShell>
   );
 };
