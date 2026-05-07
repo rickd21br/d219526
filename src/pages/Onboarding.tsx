@@ -162,16 +162,32 @@ const Onboarding = () => {
     }
   };
 
+  const updateAudioRef = useRef<HTMLAudioElement | null>(null);
+  const UPDATE_BULLETS = 5;
+  const UPDATE_DURATION_MS = 7500;
+
   const handleUpdate = async () => {
     setUpdateOpen(true);
     setUpdatePhase("checking");
     setUpdateProgress(0);
 
-    // animação de progresso real (busca + simula)
-    const startedAt = Date.now();
+    // toca o áudio de verificação em volume agradável
+    try {
+      if (!updateAudioRef.current) {
+        updateAudioRef.current = new Audio("/sounds/verificando-update.mp3");
+        updateAudioRef.current.volume = 0.5;
+      }
+      updateAudioRef.current.currentTime = 0;
+      void updateAudioRef.current.play().catch(() => {});
+    } catch {
+      /* ignore */
+    }
+
+    // bullets progressivos durante 7.5s
+    const stepMs = UPDATE_DURATION_MS / UPDATE_BULLETS;
     const tick = setInterval(() => {
-      setUpdateProgress((p) => Math.min(95, p + Math.random() * 12 + 4));
-    }, 180);
+      setUpdateProgress((p) => (p >= UPDATE_BULLETS ? p : p + 1));
+    }, stepMs);
 
     let hasUpdate = needRefresh;
     try {
@@ -180,12 +196,14 @@ const Onboarding = () => {
       hasUpdate = false;
     }
 
-    // garante mínimo 1.2s para a UX
-    const elapsed = Date.now() - startedAt;
-    if (elapsed < 1200) await new Promise((r) => setTimeout(r, 1200 - elapsed));
-
+    await new Promise((r) => setTimeout(r, UPDATE_DURATION_MS));
     clearInterval(tick);
-    setUpdateProgress(100);
+    setUpdateProgress(UPDATE_BULLETS);
+    try {
+      updateAudioRef.current?.pause();
+    } catch {
+      /* ignore */
+    }
     setUpdatePhase(hasUpdate ? "available" : "updated");
   };
 
