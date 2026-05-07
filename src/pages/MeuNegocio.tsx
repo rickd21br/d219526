@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { useStorage } from "@/hooks/useStorage";
-import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ExternalLink } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,31 +13,42 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 // ---------- Types ----------
-type Supplier = { name: string; phone?: string; email?: string; address?: string };
+type Contact = { name: string; phone?: string; email?: string; address?: string };
 type Product = {
   id: string;
   name: string;
-  category: string;
+  description?: string;
   cost: number;
   price: number;
-  stock: number;
-  description?: string;
+  shipping: number;
   image?: string;
-  supplier?: Supplier;
+  supplier?: Contact;
 };
 
-type Recurrence = "unico" | "diario" | "semanal" | "mensal" | "bimestral" | "trimestral" | "anual" | "personalizado";
+type Recurrence = "diario" | "semanal" | "mensal" | "trimestral" | "semestral" | "anual" | "personalizado";
+type PayMethod = "pix" | "credito" | "boleto";
 type Service = {
   id: string;
   name: string;
+  image?: string;
   type: "unico" | "recorrente";
   recurrence?: Recurrence;
   amount: number;
-  startDate: string;
-  receiveDate: string;
-  status: "pendente" | "recebido";
+  hireDate: string;
   description?: string;
+  methods: PayMethod[];
+  client?: Contact;
+};
+
+type Infoproduct = {
+  id: string;
+  name: string;
   image?: string;
+  price: number;
+  commissionType: "percent" | "fixed";
+  commission: number;
+  platform: string;
+  description?: string;
 };
 
 type PaymentMethod = "Pix" | "Crédito" | "Débito" | "Boleto";
@@ -56,19 +67,11 @@ type Sale = {
   refund?: boolean;
   chargeback?: boolean;
 };
-type Infoproduct = {
-  id: string;
-  name: string;
-  platform: string;
-  commissionType: "percent" | "fixed";
-  commission: number;
-  description?: string;
-};
 
-const FIXED_PLATFORMS = ["Hotmart", "Kiwify", "Cakto", "Ticto"];
+const FIXED_PLATFORMS = ["Hotmart", "Kiwify", "Cakto"];
 const uid = () => Math.random().toString(36).slice(2, 10);
 
-// ---------- File reader ----------
+// ---------- helpers ----------
 function readFile(file: File): Promise<string | undefined> {
   return new Promise((resolve) => {
     const r = new FileReader();
@@ -77,7 +80,50 @@ function readFile(file: File): Promise<string | undefined> {
   });
 }
 
-// ---------- CSV parse ----------
+const fmtBRL = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+const parseMoney = (s: string) => {
+  const digits = s.replace(/\D/g, "");
+  return digits ? Number(digits) / 100 : 0;
+};
+const maskMoney = (v: number) =>
+  v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+function MoneyInput({ value, onChange, placeholder }: { value: number; onChange: (v: number) => void; placeholder?: string }) {
+  return (
+    <div className="relative">
+      <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground">R$</span>
+      <Input
+        inputMode="numeric"
+        className="pl-8"
+        placeholder={placeholder}
+        value={value ? maskMoney(value) : ""}
+        onChange={(e) => onChange(parseMoney(e.target.value))}
+      />
+    </div>
+  );
+}
+
+function PhotoPicker({ value, onChange }: { value?: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  return (
+    <button
+      type="button"
+      onClick={() => ref.current?.click()}
+      className="relative flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-2 border-dashed border-border bg-muted/40 text-muted-foreground hover:border-blue-500 hover:text-blue-500"
+    >
+      {value ? <img src={value} alt="" className="h-full w-full object-cover" /> : <ImageIcon className="h-6 w-6" />}
+      <input
+        ref={ref}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={async (e) => { const f = e.target.files?.[0]; if (f) onChange((await readFile(f)) || ""); }}
+      />
+    </button>
+  );
+}
+
+// ---------- CSV parse (vendas import) ----------
 function parseCSV(text: string): Record<string, string>[] {
   const lines = text.trim().split(/\r?\n/);
   if (!lines.length) return [];
@@ -124,39 +170,22 @@ function ProdutosTab() {
   const [editing, setEditing] = useState<Product | null>(null);
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
-  const [cat, setCat] = useState("todas");
 
-  const categories = useMemo(() => Array.from(new Set(items.map((i) => i.category).filter(Boolean))), [items]);
-  const filtered = items.filter(
-    (p) =>
-      (cat === "todas" || p.category === cat) &&
-      (q === "" || p.name.toLowerCase().includes(q.toLowerCase()))
+  const filtered = useMemo(
+    () => items.filter((p) => q === "" || p.name.toLowerCase().includes(q.toLowerCase())),
+    [items, q]
   );
 
   const save = (p: Product) => {
-    setItems((prev) => {
-      const exists = prev.find((x) => x.id === p.id);
-      return exists ? prev.map((x) => (x.id === p.id ? p : x)) : [p, ...prev];
-    });
-    setOpen(false);
-    setEditing(null);
-    toast.success("Produto salvo");
+    setItems((prev) => prev.find((x) => x.id === p.id) ? prev.map((x) => x.id === p.id ? p : x) : [p, ...prev]);
+    setOpen(false); setEditing(null); toast.success("Produto salvo");
   };
 
   return (
     <div className="space-y-3">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar..." className="pl-8" />
-        </div>
-        <Select value={cat} onValueChange={setCat}>
-          <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="todas">Todas</SelectItem>
-            {categories.map((c) => (<SelectItem key={c} value={c}>{c}</SelectItem>))}
-          </SelectContent>
-        </Select>
+      <div className="relative">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar..." className="pl-8" />
       </div>
 
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
@@ -182,8 +211,8 @@ function ProdutosTab() {
               )}
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold">{p.name}</p>
-                <p className="truncate text-xs text-muted-foreground">{p.category} • Estoque: {p.stock}</p>
-                <p className="text-xs">R$ {p.price.toFixed(2)} <span className={cn("ml-1 font-semibold", margin >= 0 ? "text-emerald-600" : "text-red-500")}>({margin.toFixed(0)}%)</span></p>
+                <p className="truncate text-xs text-muted-foreground">{fmtBRL(p.cost)} → {fmtBRL(p.price)}</p>
+                <p className="text-xs">Frete: {fmtBRL(p.shipping)} <span className={cn("ml-1 font-semibold", margin >= 0 ? "text-emerald-600" : "text-red-500")}>({margin.toFixed(0)}%)</span></p>
               </div>
               <div className="flex flex-col gap-1">
                 <button onClick={() => { setEditing(p); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
@@ -199,31 +228,29 @@ function ProdutosTab() {
 
 function ProductForm({ initial, onSave }: { initial: Product | null; onSave: (p: Product) => void }) {
   const [f, setF] = useState<Product>(
-    initial ?? { id: uid(), name: "", category: "", cost: 0, price: 0, stock: 0, description: "", image: "", supplier: {} as Supplier }
+    initial ?? { id: uid(), name: "", description: "", cost: 0, price: 0, shipping: 0, image: "", supplier: { name: "" } }
   );
   const set = (k: keyof Product, v: any) => setF((p) => ({ ...p, [k]: v }));
-  const setSup = (k: keyof Supplier, v: any) => setF((p) => ({ ...p, supplier: { ...(p.supplier || { name: "" }), [k]: v } }));
+  const setSup = (k: keyof Contact, v: any) => setF((p) => ({ ...p, supplier: { ...(p.supplier || { name: "" }), [k]: v } }));
 
   return (
     <div className="space-y-3">
-      <div><Label>Nome</Label><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
-      <div><Label>Categoria</Label><Input value={f.category} onChange={(e) => set("category", e.target.value)} /></div>
-      <div className="grid grid-cols-3 gap-2">
-        <div><Label>Custo</Label><Input type="number" value={f.cost} onChange={(e) => set("cost", +e.target.value)} /></div>
-        <div><Label>Venda</Label><Input type="number" value={f.price} onChange={(e) => set("price", +e.target.value)} /></div>
-        <div><Label>Estoque</Label><Input type="number" value={f.stock} onChange={(e) => set("stock", +e.target.value)} /></div>
+      <div className="flex gap-3">
+        <PhotoPicker value={f.image} onChange={(v) => set("image", v)} />
+        <div className="flex-1"><Label>Nome do produto</Label><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
       </div>
       <div><Label>Descrição</Label><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
-      <div><Label>Imagem</Label>
-        <Input type="file" accept="image/*" onChange={async (e) => { const file = e.target.files?.[0]; if (file) set("image", await readFile(file)); }} />
-        {f.image && <img src={f.image} alt="" className="mt-2 h-20 w-20 rounded-lg object-cover" />}
+      <div className="grid grid-cols-2 gap-2">
+        <div><Label>Valor de compra</Label><MoneyInput value={f.cost} onChange={(v) => set("cost", v)} /></div>
+        <div><Label>Valor de venda</Label><MoneyInput value={f.price} onChange={(v) => set("price", v)} /></div>
       </div>
+      <div><Label>Entrega / Frete</Label><MoneyInput value={f.shipping} onChange={(v) => set("shipping", v)} /></div>
       <div className="rounded-xl border border-border p-3">
-        <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">Fornecedor</p>
+        <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">Fornecedor / Proprietário</p>
         <div className="space-y-2">
           <Input placeholder="Nome" value={f.supplier?.name || ""} onChange={(e) => setSup("name", e.target.value)} />
-          <Input placeholder="Telefone" value={f.supplier?.phone || ""} onChange={(e) => setSup("phone", e.target.value)} />
           <Input placeholder="Email" value={f.supplier?.email || ""} onChange={(e) => setSup("email", e.target.value)} />
+          <Input placeholder="Telefone" value={f.supplier?.phone || ""} onChange={(e) => setSup("phone", e.target.value)} />
           <Input placeholder="Endereço" value={f.supplier?.address || ""} onChange={(e) => setSup("address", e.target.value)} />
         </div>
       </div>
@@ -243,7 +270,6 @@ function ServicosTab() {
     setOpen(false); setEditing(null);
     toast.success("Serviço salvo");
   };
-  const toggle = (s: Service) => setItems(items.map((x) => x.id === s.id ? { ...x, status: x.status === "recebido" ? "pendente" : "recebido" } : x));
 
   return (
     <div className="space-y-3">
@@ -258,18 +284,15 @@ function ServicosTab() {
         {items.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">Nenhum serviço.</p>}
         {items.map((s) => (
           <li key={s.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
-            {s.image ? <img src={s.image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="h-14 w-14 rounded-xl bg-blue-500/10" />}
+            {s.image ? <img src={s.image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">{s.name}</p>
-              <p className="text-xs text-muted-foreground">{s.type === "recorrente" ? `Recorrente • ${s.recurrence}` : "Único"}</p>
-              <p className="text-xs">R$ {s.amount.toFixed(2)} • {s.receiveDate}</p>
+              <p className="text-xs text-muted-foreground capitalize">{s.type === "recorrente" ? `Recorrente • ${s.recurrence}` : "Pagamento único"}</p>
+              <p className="text-xs">{fmtBRL(s.amount)} • {s.hireDate}</p>
             </div>
-            <div className="flex flex-col items-end gap-1">
-              <button onClick={() => toggle(s)} className={cn("rounded-full px-2 py-0.5 text-[10px] font-bold uppercase", s.status === "recebido" ? "bg-emerald-500/15 text-emerald-600" : "bg-amber-500/15 text-amber-600")}>{s.status}</button>
-              <div className="flex gap-1">
-                <button onClick={() => { setEditing(s); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
-                <button onClick={() => { if (confirm("Excluir?")) setItems(items.filter((x) => x.id !== s.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
-              </div>
+            <div className="flex flex-col gap-1">
+              <button onClick={() => { setEditing(s); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
+              <button onClick={() => { if (confirm("Excluir?")) setItems(items.filter((x) => x.id !== s.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
             </div>
           </li>
         ))}
@@ -280,15 +303,26 @@ function ServicosTab() {
 
 function ServiceForm({ initial, onSave }: { initial: Service | null; onSave: (s: Service) => void }) {
   const [f, setF] = useState<Service>(
-    initial ?? { id: uid(), name: "", type: "unico", amount: 0, startDate: "", receiveDate: "", status: "pendente", description: "", image: "" }
+    initial ?? { id: uid(), name: "", image: "", type: "unico", amount: 0, hireDate: new Date().toISOString().slice(0,10), description: "", methods: ["pix"], client: { name: "" } }
   );
   const set = (k: keyof Service, v: any) => setF((p) => ({ ...p, [k]: v }));
+  const setCli = (k: keyof Contact, v: any) => setF((p) => ({ ...p, client: { ...(p.client || { name: "" }), [k]: v } }));
+  const toggleMethod = (m: PayMethod) => set("methods", f.methods.includes(m) ? f.methods.filter((x) => x !== m) : [...f.methods, m]);
+
+  const RECS: { v: Recurrence; l: string }[] = [
+    { v: "diario", l: "Diário" }, { v: "semanal", l: "Semanal" }, { v: "mensal", l: "Mensal" },
+    { v: "trimestral", l: "Trimestral" }, { v: "semestral", l: "Semestral" }, { v: "anual", l: "Anual" },
+    { v: "personalizado", l: "Personalizado" },
+  ];
 
   return (
     <div className="space-y-3">
-      <div><Label>Nome</Label><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
+      <div className="flex gap-3">
+        <PhotoPicker value={f.image} onChange={(v) => set("image", v)} />
+        <div className="flex-1"><Label>Nome do serviço</Label><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
+      </div>
       <div className="grid grid-cols-2 gap-2">
-        <div><Label>Tipo</Label>
+        <div><Label>Pagamento</Label>
           <Select value={f.type} onValueChange={(v) => set("type", v)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -297,25 +331,44 @@ function ServiceForm({ initial, onSave }: { initial: Service | null; onSave: (s:
             </SelectContent>
           </Select>
         </div>
-        <div><Label>Valor</Label><Input type="number" value={f.amount} onChange={(e) => set("amount", +e.target.value)} /></div>
+        <div><Label>Valor</Label><MoneyInput value={f.amount} onChange={(v) => set("amount", v)} /></div>
       </div>
       {f.type === "recorrente" && (
         <div><Label>Periodicidade</Label>
           <Select value={f.recurrence || "mensal"} onValueChange={(v) => set("recurrence", v)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              {["diario","semanal","mensal","bimestral","trimestral","anual","personalizado"].map((r) => (<SelectItem key={r} value={r}>{r}</SelectItem>))}
+              {RECS.map((r) => (<SelectItem key={r.v} value={r.v}>{r.l}</SelectItem>))}
             </SelectContent>
           </Select>
         </div>
       )}
-      <div className="grid grid-cols-2 gap-2">
-        <div><Label>Início</Label><Input type="date" value={f.startDate} onChange={(e) => set("startDate", e.target.value)} /></div>
-        <div><Label>Recebimento</Label><Input type="date" value={f.receiveDate} onChange={(e) => set("receiveDate", e.target.value)} /></div>
-      </div>
+      <div><Label>Data de contratação</Label><Input type="date" value={f.hireDate} onChange={(e) => set("hireDate", e.target.value)} /></div>
       <div><Label>Descrição</Label><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
-      <div><Label>Imagem</Label>
-        <Input type="file" accept="image/*" onChange={async (e) => { const file = e.target.files?.[0]; if (file) set("image", await readFile(file)); }} />
+      <div>
+        <Label>Formas de recebimento</Label>
+        <div className="mt-1 flex gap-2">
+          {(["pix","credito","boleto"] as PayMethod[]).map((m) => (
+            <button
+              type="button"
+              key={m}
+              onClick={() => toggleMethod(m)}
+              className={cn("flex-1 rounded-lg border px-2 py-2 text-xs font-semibold capitalize",
+                f.methods.includes(m) ? "border-blue-600 bg-blue-600 text-white" : "border-border bg-card text-muted-foreground")}
+            >
+              {m === "credito" ? "Crédito" : m === "pix" ? "Pix" : "Boleto"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="rounded-xl border border-border p-3">
+        <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">Cliente</p>
+        <div className="space-y-2">
+          <Input placeholder="Nome" value={f.client?.name || ""} onChange={(e) => setCli("name", e.target.value)} />
+          <Input placeholder="Email" value={f.client?.email || ""} onChange={(e) => setCli("email", e.target.value)} />
+          <Input placeholder="Telefone" value={f.client?.phone || ""} onChange={(e) => setCli("phone", e.target.value)} />
+          <Input placeholder="Endereço" value={f.client?.address || ""} onChange={(e) => setCli("address", e.target.value)} />
+        </div>
       </div>
       <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => f.name && onSave(f)}>Salvar</Button>
     </div>
@@ -378,11 +431,12 @@ function InfoProductsView({ products, setProducts, platforms }: { products: Info
     setProducts((prev) => prev.find((x) => x.id === p.id) ? prev.map((x) => x.id === p.id ? p : x) : [p, ...prev]);
     setOpen(false); setEditing(null); toast.success("Salvo");
   };
+  const calcCommission = (p: Infoproduct) => p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission;
   return (
     <div className="space-y-2">
       <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) setEditing(null); }}>
         <DialogTrigger asChild><Button className="w-full bg-blue-600 hover:bg-blue-700"><Plus className="mr-1 h-4 w-4" />Novo infoproduto</Button></DialogTrigger>
-        <DialogContent>
+        <DialogContent className="max-h-[85vh] overflow-y-auto">
           <DialogHeader><DialogTitle>{editing ? "Editar" : "Novo"} infoproduto</DialogTitle></DialogHeader>
           <InfoForm initial={editing} platforms={platforms} onSave={save} />
         </DialogContent>
@@ -390,16 +444,16 @@ function InfoProductsView({ products, setProducts, platforms }: { products: Info
       <ul className="space-y-2">
         {products.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum infoproduto.</p>}
         {products.map((p) => (
-          <li key={p.id} className="rounded-2xl border border-border bg-card p-3">
-            <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-bold">{p.name}</p>
-                <p className="text-xs text-muted-foreground">{p.platform} • {p.commissionType === "percent" ? `${p.commission}%` : `R$ ${p.commission.toFixed(2)}`}</p>
-              </div>
-              <div className="flex gap-1">
-                <button onClick={() => { setEditing(p); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
-                <button onClick={() => { if (confirm("Excluir?")) setProducts(products.filter((x) => x.id !== p.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
-              </div>
+          <li key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
+            {p.image ? <img src={p.image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold">{p.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{p.platform} • {fmtBRL(p.price)}</p>
+              <p className="text-xs text-emerald-600 font-semibold">Comissão: {fmtBRL(calcCommission(p))} {p.commissionType === "percent" && `(${p.commission}%)`}</p>
+            </div>
+            <div className="flex flex-col gap-1">
+              <button onClick={() => { setEditing(p); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
+              <button onClick={() => { if (confirm("Excluir?")) setProducts(products.filter((x) => x.id !== p.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
             </div>
           </li>
         ))}
@@ -409,25 +463,38 @@ function InfoProductsView({ products, setProducts, platforms }: { products: Info
 }
 
 function InfoForm({ initial, platforms, onSave }: { initial: Infoproduct | null; platforms: string[]; onSave: (p: Infoproduct) => void }) {
-  const [f, setF] = useState<Infoproduct>(initial ?? { id: uid(), name: "", platform: platforms[0], commissionType: "percent", commission: 0, description: "" });
+  const [f, setF] = useState<Infoproduct>(initial ?? { id: uid(), name: "", image: "", price: 0, platform: platforms[0], commissionType: "percent", commission: 0, description: "" });
   const set = (k: keyof Infoproduct, v: any) => setF((p) => ({ ...p, [k]: v }));
+  const calcCommission = f.commissionType === "percent" ? (f.price * f.commission) / 100 : f.commission;
   return (
     <div className="space-y-3">
-      <div><Label>Nome</Label><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
-      <div><Label>Plataforma</Label>
+      <div className="flex gap-3">
+        <PhotoPicker value={f.image} onChange={(v) => set("image", v)} />
+        <div className="flex-1"><Label>Nome do infoproduto</Label><Input value={f.name} onChange={(e) => set("name", e.target.value)} /></div>
+      </div>
+      <div><Label>Preço</Label><MoneyInput value={f.price} onChange={(v) => set("price", v)} /></div>
+      <div className="grid grid-cols-2 gap-2">
+        <div><Label>Tipo comissão</Label>
+          <Select value={f.commissionType} onValueChange={(v) => set("commissionType", v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent><SelectItem value="percent">Porcentagem (%)</SelectItem><SelectItem value="fixed">Valor (R$)</SelectItem></SelectContent>
+          </Select>
+        </div>
+        <div><Label>{f.commissionType === "percent" ? "% comissão" : "Valor R$"}</Label>
+          {f.commissionType === "percent"
+            ? <Input type="number" inputMode="decimal" value={f.commission || ""} onChange={(e) => set("commission", +e.target.value)} />
+            : <MoneyInput value={f.commission} onChange={(v) => set("commission", v)} />}
+        </div>
+      </div>
+      <div className="rounded-xl border border-blue-500/30 bg-blue-500/5 p-3">
+        <p className="text-[10px] font-bold uppercase text-muted-foreground">Comissão a receber</p>
+        <p className="text-lg font-bold text-blue-600">{fmtBRL(calcCommission)}</p>
+      </div>
+      <div><Label>Plataforma / Hub de pagamento</Label>
         <Select value={f.platform} onValueChange={(v) => set("platform", v)}>
           <SelectTrigger><SelectValue /></SelectTrigger>
           <SelectContent>{platforms.map((p) => (<SelectItem key={p} value={p}>{p}</SelectItem>))}</SelectContent>
         </Select>
-      </div>
-      <div className="grid grid-cols-2 gap-2">
-        <div><Label>Tipo</Label>
-          <Select value={f.commissionType} onValueChange={(v) => set("commissionType", v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent><SelectItem value="percent">%</SelectItem><SelectItem value="fixed">R$</SelectItem></SelectContent>
-          </Select>
-        </div>
-        <div><Label>Comissão</Label><Input type="number" value={f.commission} onChange={(e) => set("commission", +e.target.value)} /></div>
       </div>
       <div><Label>Descrição</Label><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
       <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => f.name && onSave(f)}>Salvar</Button>
@@ -457,7 +524,7 @@ function SalesView({ sales, setSales, products }: { sales: Sale[]; setSales: (v:
   };
 
   const importFile = async (file: File) => {
-    if (!file.name.toLowerCase().endsWith(".csv")) { toast.error("Use arquivo CSV (XLS pode ser exportado como CSV)"); return; }
+    if (!file.name.toLowerCase().endsWith(".csv")) { toast.error("Use arquivo CSV"); return; }
     const text = await file.text();
     const rows = parseCSV(text);
     let added = 0;
@@ -531,7 +598,7 @@ function SalesView({ sales, setSales, products }: { sales: Sale[]; setSales: (v:
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">{s.customer}</p>
-                <p className="text-xs text-muted-foreground">{s.payment} • {s.date} • R$ {s.amount.toFixed(2)}</p>
+                <p className="text-xs text-muted-foreground">{s.payment} • {s.date} • {fmtBRL(s.amount)}</p>
                 {s.email && <p className="truncate text-[10px] text-muted-foreground">{s.email}</p>}
               </div>
               <div className="flex flex-col items-end gap-1">
@@ -575,7 +642,7 @@ function SaleForm({ initial, products, onSave }: { initial: Sale | null; product
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div><Label>CPF</Label><Input value={f.cpf} onChange={(e) => set("cpf", e.target.value)} /></div>
-        <div><Label>Valor</Label><Input type="number" value={f.amount} onChange={(e) => set("amount", +e.target.value)} /></div>
+        <div><Label>Valor</Label><MoneyInput value={f.amount} onChange={(v) => set("amount", v)} /></div>
       </div>
       <div className="grid grid-cols-2 gap-2">
         <div><Label>Pagamento</Label>
