@@ -38,6 +38,7 @@ const Reports = () => {
   const [bizProducts] = useStorage<BizProduct[]>("d21.mn.products", []);
   const [bizServices] = useStorage<BizService[]>("d21.mn.services", []);
   const [bizInfos] = useStorage<BizInfo[]>("d21.mn.infoproducts", []);
+  const [incorporate, setIncorporate] = useStorage<boolean>("d21.mn.incorporate", false);
 
   const bizSummary = useMemo(() => {
     const prodReceita = bizProducts.reduce((s, p) => s + p.price, 0);
