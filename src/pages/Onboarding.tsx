@@ -584,6 +584,24 @@ const Onboarding = () => {
                   Disponível após você concluir a validação de acesso e criar um PIN.
                 </p>
               )}
+              <ul className="mt-3 grid grid-cols-4 gap-1.5 text-center">
+                <li className="flex flex-col items-center gap-1">
+                  <Wallet className="h-5 w-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]" strokeWidth={2.2} />
+                  <span className="whitespace-nowrap text-[9px] leading-tight text-white/85">Controle total de finanças</span>
+                </li>
+                <li className="flex flex-col items-center gap-1">
+                  <ShieldCheck className="h-5 w-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]" strokeWidth={2.2} />
+                  <span className="whitespace-nowrap text-[9px] leading-tight text-white/85">Segurança e privacidade</span>
+                </li>
+                <li className="flex flex-col items-center gap-1">
+                  <BarChart3 className="h-5 w-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]" strokeWidth={2.2} />
+                  <span className="whitespace-nowrap text-[9px] leading-tight text-white/85">Relatórios eficientes</span>
+                </li>
+                <li className="flex flex-col items-center gap-1">
+                  <Bot className="h-5 w-5 text-white drop-shadow-[0_0_6px_rgba(255,255,255,0.55)]" strokeWidth={2.2} />
+                  <span className="whitespace-nowrap text-[9px] leading-tight text-white/85">Agente de IA 24H</span>
+                </li>
+              </ul>
               <div className="mt-3 flex flex-nowrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-[10px] text-white/70 backdrop-blur-md">
                 <span className="whitespace-nowrap">
                   Criado por <span className="font-semibold text-white/90">Wanderson Richard</span>
