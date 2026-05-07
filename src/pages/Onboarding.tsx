@@ -366,13 +366,13 @@ const Onboarding = () => {
         </header>
 
         {/* HEADLINE */}
-        <div className="mt-5 space-y-3 pt-2">
+        <div className="mt-5 flex w-full flex-col items-center space-y-3 pt-2">
           <img
             src={headlineFuturo}
             alt="O futuro que você quer começa com uma decisão. Disciplina hoje. Liberdade amanhã."
-            className="h-auto w-full max-w-[320px] object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)]"
+            className="mx-auto h-auto w-full max-w-[420px] object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)] sm:max-w-[520px]"
           />
-          <p className="flex items-center gap-2 text-[12px] leading-snug text-white/75">
+          <p className="flex items-center gap-2 text-center text-[12px] leading-snug text-white/75">
             <Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden />
             Preencha os dados abaixo para acessar o app.
           </p>
@@ -384,7 +384,7 @@ const Onboarding = () => {
           <>
             <form
               onSubmit={handleSubmit}
-              className="relative mt-10 space-y-3.5 rounded-3xl border border-white/15 bg-white/10 p-5 shadow-floating backdrop-blur-xl"
+              className="relative mt-py-4 space-y-3.5 rounded-3xl border border-white/15 bg-white/10 p-5 shadow-floating backdrop-blur-xl"
             >
               {/* Grupo de ações: ajuda, atualizar, instalar */}
               <div className="absolute -top-4 right-3 z-10 flex items-center gap-3.5">
