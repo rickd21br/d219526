@@ -87,7 +87,7 @@ export function TopBar() {
             aria-label="Destaques do plano"
             className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-soft transition-smooth hover:bg-secondary text-primary"
           >
-            <Sparkles className="h-5 w-5" strokeWidth={2} />
+            <img src={triggerIcon} alt="" className="h-6 w-6" />
           </button>
 
           {/* Menu */}
@@ -169,28 +169,31 @@ export function TopBar() {
       </div>
 
       <Dialog open={highlightsOpen} onOpenChange={setHighlightsOpen}>
-        <DialogContent className="max-w-md rounded-3xl border border-primary/30 bg-background/70 backdrop-blur-xl shadow-floating">
-          <DialogHeader>
-            <DialogTitle className="text-center text-base font-bold">
-              Tudo o que você precisa para <span className="text-primary">EVOLUIR EM 21 DIAS</span>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="grid grid-cols-3 gap-3 pt-2">
+        <DialogContent className="max-w-md rounded-3xl border border-primary/40 bg-background/70 backdrop-blur-xl shadow-floating">
+          <div className="grid grid-cols-3 gap-x-2 gap-y-5 pt-2 divide-x divide-y-0 divide-primary/20">
             {[
-              { Icon: Bot, title: "Mentor 24H", sub: "Nosso Agente de IA" },
-              { Icon: Smartphone, title: "App Exclusivo", sub: "Mobile e Desktop" },
-              { Icon: FileSpreadsheet, title: "Planilhas Financeiras", sub: "+ de 6000 Planilhas" },
-              { Icon: ClipboardCheck, title: "Checklists PRO", sub: "Protocolos Exclusivos" },
-              { Icon: PlayCircle, title: "Vídeo Aulas", sub: "Aprenda no seu tempo" },
-              { Icon: Gift, title: "Bônus Exclusivos", sub: "Brindes Surpresa" },
-            ].map(({ Icon, title, sub }) => (
-              <div key={title} className="flex flex-col items-center gap-1.5 rounded-2xl border border-primary/20 bg-card/40 p-3 text-center backdrop-blur-sm">
-                <Icon className="h-8 w-8 text-primary drop-shadow-[0_0_8px_hsl(var(--primary)/0.6)]" strokeWidth={1.8} />
-                <p className="text-[11px] font-bold leading-tight">{title}</p>
-                <p className="text-[10px] leading-tight text-primary/90">{sub}</p>
+              { icon: mentorIcon, title: "Mentor 24H", sub: "Nosso Agente de IA" },
+              { icon: appIcon, title: "App Exclusivo", sub: "Mobile e Desktop" },
+              { icon: planilhasIcon, title: "Planilhas Financeiras", sub: "+ de 6000 Planilhas" },
+              { icon: checklistsIcon, title: "Checklists PRO", sub: "Protocolos Exclusivos" },
+              { icon: videoaulasIcon, title: "Vídeo Aulas", sub: "Aprenda no seu tempo" },
+              { icon: bonusIcon, title: "Bônus Exclusivos", sub: "Brindes Surpresa." },
+            ].map(({ icon, title, sub }) => (
+              <div key={title} className="flex flex-col items-center gap-1.5 px-2 text-center">
+                <img
+                  src={icon}
+                  alt=""
+                  className="h-12 w-12 drop-shadow-[0_0_10px_hsl(var(--primary)/0.7)]"
+                  style={{ filter: "drop-shadow(0 0 6px hsl(var(--primary) / 0.8))" }}
+                />
+                <p className="text-[12px] font-bold leading-tight">{title}</p>
+                <p className="text-[10px] leading-tight text-primary">{sub}</p>
               </div>
             ))}
           </div>
+          <DialogTitle className="pt-2 text-center text-[11px] font-semibold tracking-[0.18em] text-foreground/90">
+            TUDO O QUE VOCÊ PRECISA PARA <span className="text-primary">EVOLUIR EM 21 DIAS.</span>
+          </DialogTitle>
         </DialogContent>
       </Dialog>
     </header>
