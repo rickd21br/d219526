@@ -1,13 +1,18 @@
 import { MobileShell } from "@/components/MobileShell";
 import { useTransactions, useJourney, formatCurrency } from "@/hooks/useFinance";
+import { useStorage } from "@/hooks/useStorage";
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
 } from "recharts";
 import { useMemo } from "react";
 import { format, parseISO } from "date-fns";
-import { ArrowDownCircle, ArrowUpCircle, TrendingUp, Trophy, Sparkles } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, TrendingUp, Trophy, Sparkles, Package, Wrench, GraduationCap, Briefcase } from "lucide-react";
 import { JOURNEY_DAYS } from "@/data/journey";
+
+type BizProduct = { id: string; name: string; cost: number; price: number };
+type BizService = { id: string; name: string; amount: number };
+type BizInfo = { id: string; name: string; price: number; commissionType: "percent" | "fixed"; commission: number; platform: string };
 
 const COLORS = [
   "hsl(162 73% 38%)",
