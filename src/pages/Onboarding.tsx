@@ -438,15 +438,17 @@ const Onboarding = () => {
                   aria-label="Atualizar app"
                   title={needRefresh ? "Nova versão disponível!" : "Verificar atualização"}
                   onClick={handleUpdate}
-                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 hover:bg-white/20 ${
+                  onMouseEnter={() => { setHoverIdx(1); playShowcaseSound(); }}
+                  onMouseLeave={() => setHoverIdx((i) => (i === 1 ? -1 : i))}
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 ${
                     checking ? "opacity-70" : ""
                   } ${
-                    showcaseIdx === 1
+                    showcaseIdx === 1 || hoverIdx === 1
                       ? "scale-125 ring-2 ring-white/60 shadow-[0_0_18px_rgba(255,255,255,0.55),0_0_36px_rgba(255,255,255,0.25)]"
                       : ""
                   }`}
                 >
-                  {showcaseIdx === 1 && (
+                  {(showcaseIdx === 1 || hoverIdx === 1) && (
                     <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
                       Atualizações
                     </span>
