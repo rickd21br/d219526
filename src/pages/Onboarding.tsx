@@ -384,7 +384,7 @@ const Onboarding = () => {
           <>
             <form
               onSubmit={handleSubmit}
-              className="relative mt-py-4 space-y-3.5 rounded-3xl border border-white/15 bg-white/10 p-5 shadow-floating backdrop-blur-xl"
+              className="relative mt-4 space-y-3.5 rounded-3xl border border-white/15 bg-white/10 p-5 shadow-floating backdrop-blur-xl"
             >
               {/* Grupo de ações: ajuda, atualizar, instalar */}
               <div className="absolute -top-4 right-3 z-10 flex items-center gap-3.5">
