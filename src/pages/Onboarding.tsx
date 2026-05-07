@@ -27,8 +27,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import logoD21 from "@/assets/logo-d21.png";
-// logoD21 reservado para uso em modais
-void logoD21;
 import desafio21 from "@/assets/desafio-21-dias.png";
 import googleLogo from "@/assets/google-logo.png";
 import appleLogo from "@/assets/apple-logo.png";
