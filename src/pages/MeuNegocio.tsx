@@ -208,11 +208,30 @@ const MeuNegocio = () => {
           <section>
             <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">Meus ativos por categoria</p>
             <div className="grid grid-cols-3 gap-2">
-              <CatCard icon={<Package />} color="emerald" label="Produtos" count={products.length} onClick={() => setCat("produtos")} />
-              <CatCard icon={<Wrench />} color="blue" label="Serviços" count={services.length} onClick={() => setCat("servicos")} />
-              <CatCard icon={<GraduationCap />} color="violet" label="Infoprodutos" count={infos.length} onClick={() => setCat("info")} />
+              <CatCard icon={<Package />} color="emerald" label="Produtos" count={products.length} onOpen={() => setCat("produtos")} onAdd={() => setAddOpen("produtos")} />
+              <CatCard icon={<Wrench />} color="blue" label="Serviços" count={services.length} onOpen={() => setCat("servicos")} onAdd={() => setAddOpen("servicos")} />
+              <CatCard icon={<GraduationCap />} color="violet" label="Infoprodutos" count={infos.length} onOpen={() => setCat("info")} onAdd={() => setAddOpen("info")} />
             </div>
           </section>
+
+          <Dialog open={addOpen === "produtos"} onOpenChange={(o) => !o && setAddOpen(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Novo produto</DialogTitle></DialogHeader>
+              <ProductForm initial={null} onSave={addProduct} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={addOpen === "servicos"} onOpenChange={(o) => !o && setAddOpen(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Novo serviço</DialogTitle></DialogHeader>
+              <ServiceForm initial={null} onSave={addService} />
+            </DialogContent>
+          </Dialog>
+          <Dialog open={addOpen === "info"} onOpenChange={(o) => !o && setAddOpen(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Novo infoproduto</DialogTitle></DialogHeader>
+              <InfoForm initial={null} platforms={platforms} onSave={addInfo} />
+            </DialogContent>
+          </Dialog>
 
           <section>
             <div className="mb-2 flex items-center justify-between">
