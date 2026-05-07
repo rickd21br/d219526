@@ -402,7 +402,7 @@ const Onboarding = () => {
                 Preencha os dados abaixo para acessar o app.
               </p>
               {/* Grupo de ações: ajuda, atualizar, instalar */}
-              <div className="absolute -top-[22px] right-3 z-10 flex items-center gap-3.5">
+              <div className="absolute -top-[22px] left-1/2 z-10 flex -translate-x-1/2 items-center gap-3.5">
                 <button
                   type="button"
                   aria-label="Ajuda / tutorial"
