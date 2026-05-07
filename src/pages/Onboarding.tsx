@@ -62,6 +62,11 @@ const Onboarding = () => {
   // Tutorial popup
   const [tutorialOpen, setTutorialOpen] = useState(false);
 
+  // Update modal
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updatePhase, setUpdatePhase] = useState<"checking" | "updated" | "available">("checking");
+  const [updateProgress, setUpdateProgress] = useState(0);
+
   // Showcase dos 3 botões superiores (Ajuda, Atualizações, Instalar app)
   // -1 = inativo; 0..2 = botão em destaque
   const [showcaseIdx, setShowcaseIdx] = useState<number>(-1);
@@ -158,19 +163,42 @@ const Onboarding = () => {
   };
 
   const handleUpdate = async () => {
-    if (needRefresh) {
-      toast.success("Atualizando o app…");
-      await applyUpdate();
-      return;
+    setUpdateOpen(true);
+    setUpdatePhase("checking");
+    setUpdateProgress(0);
+
+    // animação de progresso real (busca + simula)
+    const startedAt = Date.now();
+    const tick = setInterval(() => {
+      setUpdateProgress((p) => Math.min(95, p + Math.random() * 12 + 4));
+    }, 180);
+
+    let hasUpdate = needRefresh;
+    try {
+      hasUpdate = needRefresh || (await checkForUpdate());
+    } catch {
+      hasUpdate = false;
     }
-    toast.info("Procurando atualização…");
-    const has = await checkForUpdate();
-    if (has) {
-      toast.success("Nova versão encontrada! Atualizando…");
-      await applyUpdate();
-    } else {
-      toast.success("Você já está na versão mais recente.");
-    }
+
+    // garante mínimo 1.2s para a UX
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < 1200) await new Promise((r) => setTimeout(r, 1200 - elapsed));
+
+    clearInterval(tick);
+    setUpdateProgress(100);
+    setUpdatePhase(hasUpdate ? "available" : "updated");
+  };
+
+  const closeUpdateModal = () => {
+    setUpdateOpen(false);
+    setUpdateProgress(0);
+    setUpdatePhase("checking");
+  };
+
+  const confirmUpdate = async () => {
+    closeUpdateModal();
+    toast.success("Atualizando o app…");
+    await applyUpdate();
   };
 
   /** Persiste o usuário no localStorage e navega pra Home. */
@@ -308,17 +336,12 @@ const Onboarding = () => {
         className="relative z-10 mx-auto flex min-h-full w-full max-w-md flex-col px-5 pb-8 sm:max-w-lg sm:px-6"
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2.5rem)" }}
       >
-        {/* HEADER (logo apenas) */}
-        <header className="flex items-center gap-3">
-          <img
-            src={logoD21}
-            alt="Desafio D21"
-            className="h-14 w-14 shrink-0 rounded-full drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)] sm:h-16 sm:w-16"
-          />
+        {/* HEADER (apenas a logomarca dourada, alinhada à esquerda) */}
+        <header className="flex items-center">
           <img
             src={desafio21}
             alt="Desafio 21 Dias - Disciplina hoje. Liberdade amanhã."
-            className="h-auto w-full max-w-[260px] flex-1 object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)] sm:max-w-[320px]"
+            className="h-auto w-full max-w-[260px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)] sm:max-w-[300px]"
           />
         </header>
 
@@ -666,22 +689,124 @@ const Onboarding = () => {
               </span>
             </li>
           </ul>
-          <div className="mt-4 flex items-end justify-between gap-3 text-[10px] text-white/60">
-            <div className="leading-tight">
-              <p>Criado por <span className="font-semibold text-white/80">Wanderson Richard</span></p>
-              <a
-                href="https://instagram.com/eu.rickbr"
-                target="_blank"
-                rel="noreferrer"
-                className="mt-0.5 inline-flex items-center gap-1 text-white/70 hover:text-white"
-              >
-                <Instagram className="h-3 w-3" /> @eu.rickbr
-              </a>
-            </div>
-            <span className="font-mono text-white/55">v{APP_VERSION}</span>
+          <div className="mt-4 flex flex-nowrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-[10px] text-white/70 backdrop-blur-md">
+            <span className="whitespace-nowrap">
+              Criado por <span className="font-semibold text-white/90">Wanderson Richard</span>
+            </span>
+            <a
+              href="https://instagram.com/eu.rickbr"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-white/80 hover:text-white"
+            >
+              <Instagram className="h-3 w-3" /> @eu.rickbr
+            </a>
+            <span className="whitespace-nowrap font-mono text-white/60">v{APP_VERSION}</span>
           </div>
         </footer>
       </div>
+
+      {/* ============ UPDATE MODAL ============ */}
+      {updateOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-5 animate-fade-in"
+          role="dialog"
+          aria-modal="true"
+        >
+          <button
+            type="button"
+            aria-label="Fechar"
+            onClick={closeUpdateModal}
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+          />
+          <div className="relative w-full max-w-sm rounded-3xl border border-white/15 bg-card p-6 shadow-floating animate-bounce-in">
+            <button
+              type="button"
+              aria-label="Fechar"
+              onClick={closeUpdateModal}
+              className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-muted/70"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              <img
+                src={logoD21}
+                alt="D21"
+                className="h-16 w-16 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+              />
+              <h2 className="mt-3 text-lg font-bold text-foreground">D21 App</h2>
+              <p className="text-xs font-semibold text-primary">Boletos Pagos</p>
+              <p className="mt-0.5 text-[11px] tracking-wide text-muted-foreground">
+                BUILD V 2.0 {APP_VERSION}
+              </p>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-border bg-muted/40 p-4 text-center">
+              {updatePhase === "checking" && (
+                <>
+                  <p className="text-sm font-semibold text-foreground">Por gentileza aguarde...</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Buscando por novas atualizações.
+                  </p>
+                  <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-border">
+                    <div
+                      className="h-full bg-primary transition-all duration-200"
+                      style={{ width: `${updateProgress}%` }}
+                    />
+                  </div>
+                </>
+              )}
+              {updatePhase === "updated" && (
+                <>
+                  <p className="text-sm font-semibold text-foreground">Tudo certo! ✅</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Você já está na versão mais recente
+                    <br />
+                    <span className="font-mono text-foreground/80">v{APP_VERSION}</span>.
+                  </p>
+                </>
+              )}
+              {updatePhase === "available" && (
+                <>
+                  <p className="text-sm font-semibold text-foreground">
+                    Nova versão disponível! 🎉
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    Atualize agora para receber as últimas melhorias.
+                  </p>
+                </>
+              )}
+            </div>
+
+            {updatePhase === "available" ? (
+              <div className="mt-4 flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={closeUpdateModal}
+                  className="h-11 flex-1 rounded-2xl"
+                >
+                  Depois
+                </Button>
+                <Button
+                  onClick={confirmUpdate}
+                  className="h-11 flex-1 rounded-2xl bg-primary font-semibold text-primary-foreground"
+                >
+                  Atualizar
+                </Button>
+              </div>
+            ) : (
+              <Button
+                onClick={closeUpdateModal}
+                disabled={updatePhase === "checking"}
+                className="mt-4 h-11 w-full rounded-2xl bg-primary font-semibold text-primary-foreground disabled:opacity-60"
+              >
+                Fechar
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ============ TUTORIAL POPUP ============ */}
       {tutorialOpen && (
