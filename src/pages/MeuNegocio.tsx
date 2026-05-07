@@ -141,9 +141,16 @@ type Cat = "produtos" | "servicos" | "info" | null;
 
 const MeuNegocio = () => {
   const [cat, setCat] = useState<Cat>(null);
-  const [products] = useStorage<Product[]>("d21.mn.products", []);
-  const [services] = useStorage<Service[]>("d21.mn.services", []);
-  const [infos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
+  const [addOpen, setAddOpen] = useState<Cat>(null);
+  const [products, setProducts] = useStorage<Product[]>("d21.mn.products", []);
+  const [services, setServices] = useStorage<Service[]>("d21.mn.services", []);
+  const [infos, setInfos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
+  const [extraPlatforms] = useStorage<string[]>("d21.mn.platforms", []);
+  const platforms = [...FIXED_PLATFORMS, ...extraPlatforms];
+
+  const addProduct = (p: Product) => { setProducts((prev) => [p, ...prev]); setAddOpen(null); toast.success("Produto adicionado"); };
+  const addService = (s: Service) => { setServices((prev) => [s, ...prev]); setAddOpen(null); toast.success("Serviço adicionado"); };
+  const addInfo = (i: Infoproduct) => { setInfos((prev) => [i, ...prev]); setAddOpen(null); toast.success("Infoproduto adicionado"); };
 
   const totalAtivos = products.length + services.length + infos.length;
   const receitaPotencial =
