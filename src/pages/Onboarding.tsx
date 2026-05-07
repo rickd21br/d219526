@@ -689,19 +689,19 @@ const Onboarding = () => {
               </span>
             </li>
           </ul>
-          <div className="mt-4 flex items-end justify-between gap-3 text-[10px] text-white/60">
-            <div className="leading-tight">
-              <p>Criado por <span className="font-semibold text-white/80">Wanderson Richard</span></p>
-              <a
-                href="https://instagram.com/eu.rickbr"
-                target="_blank"
-                rel="noreferrer"
-                className="mt-0.5 inline-flex items-center gap-1 text-white/70 hover:text-white"
-              >
-                <Instagram className="h-3 w-3" /> @eu.rickbr
-              </a>
-            </div>
-            <span className="font-mono text-white/55">v{APP_VERSION}</span>
+          <div className="mt-4 flex flex-nowrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-[10px] text-white/70 backdrop-blur-md">
+            <span className="whitespace-nowrap">
+              Criado por <span className="font-semibold text-white/90">Wanderson Richard</span>
+            </span>
+            <a
+              href="https://instagram.com/eu.rickbr"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex shrink-0 items-center gap-1 whitespace-nowrap text-white/80 hover:text-white"
+            >
+              <Instagram className="h-3 w-3" /> @eu.rickbr
+            </a>
+            <span className="whitespace-nowrap font-mono text-white/60">v{APP_VERSION}</span>
           </div>
         </footer>
       </div>
