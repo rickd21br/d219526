@@ -62,6 +62,11 @@ const Onboarding = () => {
   // Tutorial popup
   const [tutorialOpen, setTutorialOpen] = useState(false);
 
+  // Update modal
+  const [updateOpen, setUpdateOpen] = useState(false);
+  const [updatePhase, setUpdatePhase] = useState<"checking" | "updated" | "available">("checking");
+  const [updateProgress, setUpdateProgress] = useState(0);
+
   // Showcase dos 3 botões superiores (Ajuda, Atualizações, Instalar app)
   // -1 = inativo; 0..2 = botão em destaque
   const [showcaseIdx, setShowcaseIdx] = useState<number>(-1);
