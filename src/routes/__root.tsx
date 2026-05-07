@@ -10,6 +10,8 @@ import {
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { useEffect } from "react";
+import { runDataMigrations } from "@/lib/dataMigration";
 
 import appCss from "../styles.css?url";
 
@@ -113,6 +115,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  useEffect(() => { runDataMigrations(); }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
