@@ -336,8 +336,8 @@ const Onboarding = () => {
         className="relative z-10 mx-auto flex min-h-full w-full max-w-md flex-col px-5 pb-8 sm:max-w-lg sm:px-6"
         style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2.5rem)" }}
       >
-        {/* HEADER (apenas a logomarca dourada, alinhada à esquerda) */}
-        <header className="flex items-center">
+        {/* HEADER (apenas a logomarca dourada, alinhada à esquerda do container) */}
+        <header className="-ml-2 flex items-center sm:-ml-3">
           <img
             src={desafio21}
             alt="Desafio 21 Dias - Disciplina hoje. Liberdade amanhã."
