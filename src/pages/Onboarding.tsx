@@ -163,19 +163,42 @@ const Onboarding = () => {
   };
 
   const handleUpdate = async () => {
-    if (needRefresh) {
-      toast.success("Atualizando o app…");
-      await applyUpdate();
-      return;
+    setUpdateOpen(true);
+    setUpdatePhase("checking");
+    setUpdateProgress(0);
+
+    // animação de progresso real (busca + simula)
+    const startedAt = Date.now();
+    const tick = setInterval(() => {
+      setUpdateProgress((p) => Math.min(95, p + Math.random() * 12 + 4));
+    }, 180);
+
+    let hasUpdate = needRefresh;
+    try {
+      hasUpdate = needRefresh || (await checkForUpdate());
+    } catch {
+      hasUpdate = false;
     }
-    toast.info("Procurando atualização…");
-    const has = await checkForUpdate();
-    if (has) {
-      toast.success("Nova versão encontrada! Atualizando…");
-      await applyUpdate();
-    } else {
-      toast.success("Você já está na versão mais recente.");
-    }
+
+    // garante mínimo 1.2s para a UX
+    const elapsed = Date.now() - startedAt;
+    if (elapsed < 1200) await new Promise((r) => setTimeout(r, 1200 - elapsed));
+
+    clearInterval(tick);
+    setUpdateProgress(100);
+    setUpdatePhase(hasUpdate ? "available" : "updated");
+  };
+
+  const closeUpdateModal = () => {
+    setUpdateOpen(false);
+    setUpdateProgress(0);
+    setUpdatePhase("checking");
+  };
+
+  const confirmUpdate = async () => {
+    closeUpdateModal();
+    toast.success("Atualizando o app…");
+    await applyUpdate();
   };
 
   /** Persiste o usuário no localStorage e navega pra Home. */
