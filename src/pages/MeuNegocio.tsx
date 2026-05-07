@@ -388,7 +388,7 @@ function ProdutosTab() {
           return (
             <li key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
               {p.image ? (
-                <img src={p.image} alt={p.name} className="h-14 w-14 rounded-xl object-cover" />
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40"><img src={p.image} alt={p.name} className="max-h-full max-w-full object-contain" /></div>
               ) : (
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>
               )}
@@ -467,7 +467,7 @@ function ServicosTab() {
         {items.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">Nenhum serviço.</p>}
         {items.map((s) => (
           <li key={s.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
-            {s.image ? <img src={s.image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
+            {s.image ? <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40"><img src={s.image} alt="" className="max-h-full max-w-full object-contain" /></div> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">{s.name}</p>
               <p className="text-xs text-muted-foreground capitalize">{s.type === "recorrente" ? `Recorrente • ${s.recurrence}` : "Pagamento único"}</p>
@@ -628,7 +628,7 @@ function InfoProductsView({ products, setProducts, platforms }: { products: Info
         {products.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum infoproduto.</p>}
         {products.map((p) => (
           <li key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
-            {p.image ? <img src={p.image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
+            {p.image ? <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40"><img src={p.image} alt="" className="max-h-full max-w-full object-contain" /></div> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">{p.name}</p>
               <p className="truncate text-xs text-muted-foreground">{p.platform} • {fmtBRL(p.price)}</p>
