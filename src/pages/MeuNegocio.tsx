@@ -475,10 +475,13 @@ function ServicosTab() {
               <p className="text-xs text-muted-foreground capitalize">{s.type === "recorrente" ? `Recorrente • ${s.recurrence}` : "Pagamento único"}</p>
               <p className="text-xs">{fmtBRL(s.amount)} • {s.hireDate}</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <button onClick={() => { setEditing(s); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
-              <button onClick={() => { if (confirm("Excluir?")) setItems(items.filter((x) => x.id !== s.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><MoreVertical className="h-4 w-4" /></button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { setEditing(s); setOpen(true); }}><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-500" onClick={() => { if (confirm("Excluir?")) setItems(items.filter((x) => x.id !== s.id)); }}><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
         ))}
       </ul>
