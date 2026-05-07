@@ -395,14 +395,14 @@ const Onboarding = () => {
           <>
             <form
               onSubmit={handleSubmit}
-              className="relative mt-20 space-y-3.5 rounded-3xl border border-white/15 bg-white/10 px-5 pb-5 pt-7 shadow-floating backdrop-blur-xl"
+              className="relative mt-10 space-y-3.5 rounded-3xl border border-white/15 bg-white/10 px-5 pb-5 pt-12 shadow-floating backdrop-blur-xl"
             >
               <p className="flex items-center justify-center gap-2 text-center text-base font-semibold leading-snug text-white">
                 <Lightbulb className="h-4 w-4 shrink-0" aria-hidden />
                 Preencha os dados abaixo para acessar o app.
               </p>
               {/* Grupo de ações: ajuda, atualizar, instalar */}
-              <div className="absolute -top-14 right-3 z-10 flex items-center gap-3.5">
+              <div className="absolute -top-4 right-3 z-10 flex items-center gap-3.5">
                 <button
                   type="button"
                   aria-label="Ajuda / tutorial"
