@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ICE_BREAKER_AUDIOS } from "@/data/iceBreakerAudios";
 import { useIceBreakerProgress } from "@/hooks/useIceBreakerProgress";
-import { Sparkles, Play, Pause, Check, ChevronLeft, ChevronRight, Star, ChevronDown } from "lucide-react";
+import { Sparkles, Play, Pause, Check, ChevronLeft, ChevronRight, Star, ChevronDown, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useStorage } from "@/hooks/useStorage";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const MENTOR_IMG = "https://jornadadoprogresso.com/wp-content/uploads/2026/04/mentoronline.png";
 
@@ -19,6 +28,8 @@ export function IceBreakerHero() {
   });
   const [playing, setPlaying] = useState(false);
   const [xpBurst, setXpBurst] = useState<number | null>(null);
+  const [positions, setPositions] = useStorage<Record<string, number>>("d21.iceBreakerPos", {});
+  const [resumePrompt, setResumePrompt] = useState<{ idx: number; saved: number } | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const current = ICE_BREAKER_AUDIOS[index];
@@ -42,6 +53,12 @@ export function IceBreakerHero() {
     if (!a) return;
     try {
       if (a.paused) {
+        // Se há posição salva e ainda não tocou, oferecer retomar
+        const saved = positions[current.id] ?? 0;
+        if (saved > 5 && a.currentTime < 1 && !isCompleted(current.id)) {
+          setResumePrompt({ idx: index, saved });
+          return;
+        }
         await a.play();
         setPlaying(true);
       } else {
@@ -53,12 +70,20 @@ export function IceBreakerHero() {
     }
   };
 
+  const resumeFrom = (fromTime: number) => {
+    const a = audioRef.current;
+    if (!a) return;
+    a.currentTime = fromTime;
+    a.play().then(() => setPlaying(true)).catch(() => toast.error("Não consegui retomar."));
+  };
+
   const onTime = () => {
     const a = audioRef.current;
     if (!a || !a.duration || !isFinite(a.duration)) return;
     const ratio = a.currentTime / a.duration;
     const wasDone = isCompleted(current.id);
     setProgress(current.id, ratio);
+    setPositions((p) => ({ ...p, [current.id]: a.currentTime }));
     if (ratio >= 0.95 && !wasDone) {
       // XP burst dentro do card (sem toast global)
       setXpBurst(15);
@@ -296,6 +321,41 @@ export function IceBreakerHero() {
         </div>
         </div>
       </div>
+
+      <Dialog open={!!resumePrompt} onOpenChange={(o) => !o && setResumePrompt(null)}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Continuar de onde parou?</DialogTitle>
+            <DialogDescription>
+              Você ouviu até {resumePrompt ? `${Math.floor(resumePrompt.saved / 60)}:${Math.floor(resumePrompt.saved % 60).toString().padStart(2, "0")}` : "0:00"} deste bloco.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-col">
+            <button
+              type="button"
+              onClick={() => {
+                if (!resumePrompt) return;
+                const t = resumePrompt;
+                setResumePrompt(null);
+                resumeFrom(t.saved);
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-glow active:scale-[0.98]"
+            >
+              <Play className="h-4 w-4" /> Continuar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setResumePrompt(null);
+                resumeFrom(0);
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-secondary px-4 py-2.5 text-sm font-bold active:scale-[0.98]"
+            >
+              <RotateCcw className="h-4 w-4" /> Reiniciar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
