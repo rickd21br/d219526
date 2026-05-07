@@ -352,18 +352,28 @@ const Onboarding = () => {
 
       <div
         className="relative z-10 mx-auto flex min-h-full w-full max-w-md flex-col px-5 pb-8 sm:max-w-lg sm:px-6"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2.5rem)" }}
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
       >
         {/* HEADER (apenas a logomarca dourada, alinhada à esquerda do container) */}
         <header className="-ml-5 flex items-center sm:-ml-6">
           <img
             src={desafio21}
             alt="Desafio 21 Dias - Disciplina hoje. Liberdade amanhã."
-            className="h-auto w-full max-w-[260px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)] sm:max-w-[300px]"
+            className="h-auto w-full max-w-[200px] object-contain drop-shadow-[0_8px_18px_rgba(0,0,0,0.65)] sm:max-w-[230px]"
           />
         </header>
 
-        {/* HEADLINE removido — identidade visual ao lado da logomarca */}
+        {/* HEADLINE */}
+        <div className="mt-3 space-y-1.5">
+          <h1 className="text-[22px] font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-2xl">
+            O FUTURO QUE VOCÊ QUER
+            <br />
+            COMEÇA <span className="text-primary">COM UMA DECISÃO</span>
+          </h1>
+          <p className="text-sm leading-snug text-white/80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
+            Disciplina hoje. Liberdade amanhã.
+          </p>
+        </div>
 
         {/* ============ STEP: FORM ============ */}
         {step === "form" && (
