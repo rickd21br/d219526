@@ -639,10 +639,13 @@ function InfoProductsView({ products, setProducts, platforms }: { products: Info
               <p className="truncate text-xs text-muted-foreground">{p.platform} • {fmtBRL(p.price)}</p>
               <p className="text-xs text-emerald-600 font-semibold">Comissão: {fmtBRL(calcCommission(p))} {p.commissionType === "percent" && `(${p.commission}%)`}</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <button onClick={() => { setEditing(p); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
-              <button onClick={() => { if (confirm("Excluir?")) setProducts(products.filter((x) => x.id !== p.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><MoreVertical className="h-4 w-4" /></button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { setEditing(p); setOpen(true); }}><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-500" onClick={() => { if (confirm("Excluir?")) setProducts(products.filter((x) => x.id !== p.id)); }}><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
         ))}
       </ul>
