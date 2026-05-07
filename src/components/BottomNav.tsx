@@ -18,7 +18,7 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
     <NavLink
       to={to}
       end={end}
-      className={({ isActive }) =>
+      className={({ isActive }: { isActive: boolean }) =>
         cn(
           "flex flex-1 flex-col items-center justify-end gap-1 pt-1 transition-smooth",
           isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
@@ -26,7 +26,7 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
       }
       aria-label={label}
     >
-      {({ isActive }) => (
+      {({ isActive }: { isActive: boolean }) => (
         <>
           <Icon
             className={cn("h-5 w-5 transition-smooth", isActive && "scale-110")}
