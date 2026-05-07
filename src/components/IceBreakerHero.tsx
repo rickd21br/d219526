@@ -1,9 +1,18 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ICE_BREAKER_AUDIOS } from "@/data/iceBreakerAudios";
 import { useIceBreakerProgress } from "@/hooks/useIceBreakerProgress";
-import { Sparkles, Play, Pause, Check, ChevronLeft, ChevronRight, Star, ChevronDown } from "lucide-react";
+import { Sparkles, Play, Pause, Check, ChevronLeft, ChevronRight, Star, ChevronDown, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useStorage } from "@/hooks/useStorage";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const MENTOR_IMG = "https://jornadadoprogresso.com/wp-content/uploads/2026/04/mentoronline.png";
 
