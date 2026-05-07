@@ -34,6 +34,15 @@ export function TopBar() {
   const [highlightsOpen, setHighlightsOpen] = useState(false);
   const [mentorOpen, setMentorOpen] = useState(false);
 
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      (window as any).__d21PWAPrompt = e;
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
   const initials =
     (user.name || "V")
       .split(" ")
