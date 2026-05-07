@@ -180,7 +180,7 @@ const Reports = () => {
             <ArrowUpCircle className="h-3 w-3" /> Entradas
           </div>
           <div className="mt-1 text-sm font-bold" style={{ color: COLOR_INCOME }}>
-            {formatCurrency(totals.income)}
+            {formatCurrency(displayTotals.income)}
           </div>
         </div>
         <div
@@ -191,14 +191,14 @@ const Reports = () => {
             <ArrowDownCircle className="h-3 w-3" /> Saídas
           </div>
           <div className="mt-1 text-sm font-bold" style={{ color: COLOR_EXPENSE }}>
-            {formatCurrency(totals.expense)}
+            {formatCurrency(displayTotals.expense)}
           </div>
         </div>
         <div
           className="rounded-2xl p-3 shadow-soft"
           style={{
-            background: `linear-gradient(135deg, ${totals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}22, transparent)`,
-            border: `1px solid ${totals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}33`,
+            background: `linear-gradient(135deg, ${displayTotals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}22, transparent)`,
+            border: `1px solid ${displayTotals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE}33`,
           }}
         >
           <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -206,9 +206,9 @@ const Reports = () => {
           </div>
           <div
             className="mt-1 text-sm font-bold"
-            style={{ color: totals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE }}
+            style={{ color: displayTotals.balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE }}
           >
-            {formatCurrency(totals.balance)}
+            {formatCurrency(displayTotals.balance)}
           </div>
         </div>
       </section>
