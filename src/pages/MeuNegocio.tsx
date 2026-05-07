@@ -1,7 +1,8 @@
 import { useMemo, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { useStorage } from "@/hooks/useStorage";
-import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon, ChevronLeft, Package, Wrench, GraduationCap, Sprout, Volume2 } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon, ChevronLeft, Package, Wrench, GraduationCap, Sprout, Volume2, MoreVertical, Eye } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -148,9 +149,20 @@ const MeuNegocio = () => {
   const [extraPlatforms] = useStorage<string[]>("d21.mn.platforms", []);
   const platforms = [...FIXED_PLATFORMS, ...extraPlatforms];
 
-  const addProduct = (p: Product) => { setProducts((prev) => [p, ...prev]); setAddOpen(null); toast.success("Produto adicionado"); };
-  const addService = (s: Service) => { setServices((prev) => [s, ...prev]); setAddOpen(null); toast.success("Serviço adicionado"); };
-  const addInfo = (i: Infoproduct) => { setInfos((prev) => [i, ...prev]); setAddOpen(null); toast.success("Infoproduto adicionado"); };
+  const addProduct = (p: Product) => { setProducts((prev) => prev.some((x) => x.id === p.id) ? prev.map((x) => x.id === p.id ? p : x) : [p, ...prev]); setAddOpen(null); toast.success("Produto adicionado"); };
+  const addService = (s: Service) => { setServices((prev) => prev.some((x) => x.id === s.id) ? prev.map((x) => x.id === s.id ? s : x) : [s, ...prev]); setAddOpen(null); toast.success("Serviço adicionado"); };
+  const addInfo = (i: Infoproduct) => { setInfos((prev) => prev.some((x) => x.id === i.id) ? prev.map((x) => x.id === i.id ? i : x) : [i, ...prev]); setAddOpen(null); toast.success("Infoproduto adicionado"); };
+
+  const updateProduct = (p: Product) => setProducts((prev) => prev.map((x) => x.id === p.id ? p : x));
+  const updateService = (s: Service) => setServices((prev) => prev.map((x) => x.id === s.id ? s : x));
+  const updateInfo = (i: Infoproduct) => setInfos((prev) => prev.map((x) => x.id === i.id ? i : x));
+  const removeProduct = (id: string) => setProducts((prev) => prev.filter((x) => x.id !== id));
+  const removeService = (id: string) => setServices((prev) => prev.filter((x) => x.id !== id));
+  const removeInfo = (id: string) => setInfos((prev) => prev.filter((x) => x.id !== id));
+
+  const [editProd, setEditProd] = useState<Product | null>(null);
+  const [editServ, setEditServ] = useState<Service | null>(null);
+  const [editInfo, setEditInfo] = useState<Infoproduct | null>(null);
 
   const totalAtivos = products.length + services.length + infos.length;
   const receitaPotencial =
@@ -239,15 +251,34 @@ const MeuNegocio = () => {
               <button onClick={() => setCat("produtos")} className="text-xs font-semibold text-blue-600">+ Adicionar</button>
             </div>
             <ul className="space-y-2">
-              {products.slice(0, 2).map((p) => <BizCard key={p.id} image={p.image} name={p.name} badge="Produto" badgeColor="emerald" lines={[`Estoque: — • Preço: ${fmtBRL(p.price)}`, `Margem: ${p.cost > 0 ? (((p.price - p.cost) / p.cost) * 100).toFixed(0) : 0}% • Receita: ${fmtBRL(p.price)}`]} />)}
-              {services.slice(0, 1).map((s) => <BizCard key={s.id} image={s.image} name={s.name} badge="Serviço" badgeColor="blue" lines={[`Tipo: ${s.type === "recorrente" ? "Recorrente" : "Único"} • Preço: ${fmtBRL(s.amount)}`, `Receita: ${fmtBRL(s.amount)}`]} />)}
-              {infos.slice(0, 1).map((i) => <BizCard key={i.id} image={i.image} name={i.name} badge="Infoproduto" badgeColor="violet" lines={[`Plataforma: ${i.platform} • Preço: ${fmtBRL(i.price)}`, `Vendas: — • Receita: ${fmtBRL(i.price)}`]} />)}
+              {products.slice(0, 2).map((p) => <BizCard key={p.id} image={p.image} name={p.name} badge="Produto" badgeColor="emerald" lines={[`Estoque: — • Preço: ${fmtBRL(p.price)}`, `Margem: ${p.cost > 0 ? (((p.price - p.cost) / p.cost) * 100).toFixed(0) : 0}% • Receita: ${fmtBRL(p.price)}`]} onEdit={() => setEditProd(p)} onDelete={() => { if (confirm("Excluir?")) removeProduct(p.id); }} />)}
+              {services.slice(0, 1).map((s) => <BizCard key={s.id} image={s.image} name={s.name} badge="Serviço" badgeColor="blue" lines={[`Tipo: ${s.type === "recorrente" ? "Recorrente" : "Único"} • Preço: ${fmtBRL(s.amount)}`, `Receita: ${fmtBRL(s.amount)}`]} onEdit={() => setEditServ(s)} onDelete={() => { if (confirm("Excluir?")) removeService(s.id); }} />)}
+              {infos.slice(0, 1).map((i) => <BizCard key={i.id} image={i.image} name={i.name} badge="Infoproduto" badgeColor="violet" lines={[`Plataforma: ${i.platform} • Preço: ${fmtBRL(i.price)}`, `Vendas: — • Receita: ${fmtBRL(i.price)}`]} onEdit={() => setEditInfo(i)} onDelete={() => { if (confirm("Excluir?")) removeInfo(i.id); }} />)}
               {totalAtivos === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum negócio ainda.</p>}
             </ul>
             {totalAtivos > 0 && (
-              <button className="mt-3 w-full rounded-2xl border border-border bg-card py-2.5 text-sm font-semibold">Ver todos os negócios</button>
+              <button onClick={() => setCat("produtos")} className="mt-3 w-full rounded-2xl border border-border bg-card py-2.5 text-sm font-semibold">Ver todos os negócios</button>
             )}
           </section>
+
+          <Dialog open={!!editProd} onOpenChange={(o) => !o && setEditProd(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Editar produto</DialogTitle></DialogHeader>
+              {editProd && <ProductForm initial={editProd} onSave={(p) => { updateProduct(p); setEditProd(null); toast.success("Atualizado"); }} />}
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!editServ} onOpenChange={(o) => !o && setEditServ(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Editar serviço</DialogTitle></DialogHeader>
+              {editServ && <ServiceForm initial={editServ} onSave={(s) => { updateService(s); setEditServ(null); toast.success("Atualizado"); }} />}
+            </DialogContent>
+          </Dialog>
+          <Dialog open={!!editInfo} onOpenChange={(o) => !o && setEditInfo(null)}>
+            <DialogContent className="max-h-[85vh] overflow-y-auto">
+              <DialogHeader><DialogTitle>Editar infoproduto</DialogTitle></DialogHeader>
+              {editInfo && <InfoForm initial={editInfo} platforms={platforms} onSave={(i) => { updateInfo(i); setEditInfo(null); toast.success("Atualizado"); }} />}
+            </DialogContent>
+          </Dialog>
         </div>
       ) : (
         <div className="space-y-3">
@@ -273,20 +304,25 @@ const CAT_COLORS: Record<string, string> = {
 function CatCard({ icon, color, label, count, onOpen, onAdd }: { icon: React.ReactNode; color: string; label: string; count: number; onOpen: () => void; onAdd: () => void }) {
   return (
     <div className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
-      <button onClick={onOpen} className="flex flex-col items-center gap-1">
-        <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", CAT_COLORS[color])}>{icon}</div>
-        <p className="text-xl font-extrabold">{count}</p>
-        <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
-      </button>
+      <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", CAT_COLORS[color])}>{icon}</div>
+      <p className="text-xl font-extrabold">{count}</p>
+      <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
+      <button onClick={onOpen} className="text-[10px] font-semibold text-blue-600 hover:underline">Ver todos ›</button>
       <button onClick={onAdd} className="mt-1 w-full rounded-lg bg-blue-600/10 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-600/20">+ Adicionar</button>
     </div>
   );
 }
 
-function BizCard({ image, name, badge, badgeColor, lines }: { image?: string; name: string; badge: string; badgeColor: string; lines: string[] }) {
+function BizCard({ image, name, badge, badgeColor, lines, onEdit, onDelete, onView }: { image?: string; name: string; badge: string; badgeColor: string; lines: string[]; onEdit?: () => void; onDelete?: () => void; onView?: () => void }) {
   return (
-    <li className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
-      {image ? <img src={image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className={cn("flex h-14 w-14 items-center justify-center rounded-xl", CAT_COLORS[badgeColor])}><Briefcase className="h-5 w-5" /></div>}
+    <li className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
+      {image ? (
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40">
+          <img src={image} alt="" className="max-h-full max-w-full object-contain" />
+        </div>
+      ) : (
+        <div className={cn("flex h-14 w-14 shrink-0 items-center justify-center rounded-xl", CAT_COLORS[badgeColor])}><Briefcase className="h-5 w-5" /></div>
+      )}
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
           <p className="truncate text-sm font-bold">{name}</p>
@@ -294,6 +330,18 @@ function BizCard({ image, name, badge, badgeColor, lines }: { image?: string; na
         </div>
         {lines.map((l, i) => <p key={i} className="truncate text-xs text-muted-foreground">{l}</p>)}
       </div>
+      {(onEdit || onDelete || onView) && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><MoreVertical className="h-4 w-4" /></button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onView && <DropdownMenuItem onClick={onView}><Eye className="mr-2 h-4 w-4" />Visualizar</DropdownMenuItem>}
+            {onEdit && <DropdownMenuItem onClick={onEdit}><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>}
+            {onDelete && <DropdownMenuItem onClick={onDelete} className="text-red-500"><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </li>
   );
 }
@@ -339,7 +387,7 @@ function ProdutosTab() {
           return (
             <li key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
               {p.image ? (
-                <img src={p.image} alt={p.name} className="h-14 w-14 rounded-xl object-cover" />
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40"><img src={p.image} alt={p.name} className="max-h-full max-w-full object-contain" /></div>
               ) : (
                 <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>
               )}
@@ -348,10 +396,13 @@ function ProdutosTab() {
                 <p className="truncate text-xs text-muted-foreground">{fmtBRL(p.cost)} → {fmtBRL(p.price)}</p>
                 <p className="text-xs">Frete: {fmtBRL(p.shipping)} <span className={cn("ml-1 font-semibold", margin >= 0 ? "text-emerald-600" : "text-red-500")}>({margin.toFixed(0)}%)</span></p>
               </div>
-              <div className="flex flex-col gap-1">
-                <button onClick={() => { setEditing(p); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
-                <button onClick={() => { if (confirm("Excluir?")) { setItems(items.filter((x) => x.id !== p.id)); toast.success("Excluído"); } }} className="rounded p-1 hover:bg-red-500/10 text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild><button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><MoreVertical className="h-4 w-4" /></button></DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => { setEditing(p); setOpen(true); }}><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                  <DropdownMenuItem className="text-red-500" onClick={() => { if (confirm("Excluir?")) { setItems(items.filter((x) => x.id !== p.id)); toast.success("Excluído"); } }}><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </li>
           );
         })}
@@ -418,16 +469,19 @@ function ServicosTab() {
         {items.length === 0 && <p className="py-8 text-center text-sm text-muted-foreground">Nenhum serviço.</p>}
         {items.map((s) => (
           <li key={s.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3 shadow-soft">
-            {s.image ? <img src={s.image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
+            {s.image ? <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40"><img src={s.image} alt="" className="max-h-full max-w-full object-contain" /></div> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">{s.name}</p>
               <p className="text-xs text-muted-foreground capitalize">{s.type === "recorrente" ? `Recorrente • ${s.recurrence}` : "Pagamento único"}</p>
               <p className="text-xs">{fmtBRL(s.amount)} • {s.hireDate}</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <button onClick={() => { setEditing(s); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
-              <button onClick={() => { if (confirm("Excluir?")) setItems(items.filter((x) => x.id !== s.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><MoreVertical className="h-4 w-4" /></button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { setEditing(s); setOpen(true); }}><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-500" onClick={() => { if (confirm("Excluir?")) setItems(items.filter((x) => x.id !== s.id)); }}><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
         ))}
       </ul>
@@ -579,16 +633,19 @@ function InfoProductsView({ products, setProducts, platforms }: { products: Info
         {products.length === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum infoproduto.</p>}
         {products.map((p) => (
           <li key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
-            {p.image ? <img src={p.image} alt="" className="h-14 w-14 rounded-xl object-cover" /> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
+            {p.image ? <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted/40"><img src={p.image} alt="" className="max-h-full max-w-full object-contain" /></div> : <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-blue-500/10 text-blue-500"><Briefcase className="h-5 w-5" /></div>}
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-bold">{p.name}</p>
               <p className="truncate text-xs text-muted-foreground">{p.platform} • {fmtBRL(p.price)}</p>
               <p className="text-xs text-emerald-600 font-semibold">Comissão: {fmtBRL(calcCommission(p))} {p.commissionType === "percent" && `(${p.commission}%)`}</p>
             </div>
-            <div className="flex flex-col gap-1">
-              <button onClick={() => { setEditing(p); setOpen(true); }} className="rounded p-1 hover:bg-primary/10"><Pencil className="h-3.5 w-3.5" /></button>
-              <button onClick={() => { if (confirm("Excluir?")) setProducts(products.filter((x) => x.id !== p.id)); }} className="rounded p-1 text-red-500 hover:bg-red-500/10"><Trash2 className="h-3.5 w-3.5" /></button>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild><button className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted"><MoreVertical className="h-4 w-4" /></button></DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onClick={() => { setEditing(p); setOpen(true); }}><Pencil className="mr-2 h-4 w-4" />Editar</DropdownMenuItem>
+                <DropdownMenuItem className="text-red-500" onClick={() => { if (confirm("Excluir?")) setProducts(products.filter((x) => x.id !== p.id)); }}><Trash2 className="mr-2 h-4 w-4" />Excluir</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </li>
         ))}
       </ul>
