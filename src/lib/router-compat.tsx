@@ -1,5 +1,4 @@
 // Minimal react-router-dom compatibility shim over @tanstack/react-router.
-// Lets us reuse code originally written for react-router-dom v6.
 import * as React from "react";
 import {
   Link as TLink,
@@ -9,21 +8,21 @@ import {
 } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
 
-type AnyProps = Record<string, unknown>;
+const AnyLink = TLink as unknown as React.ComponentType<any>;
+const AnyNavigate = TNavigate as unknown as React.ComponentType<any>;
 
-export const Link = React.forwardRef<HTMLAnchorElement, AnyProps>(function Link(
-  { to, replace, state, children, ...rest },
+export const Link = React.forwardRef<HTMLAnchorElement, any>(function Link(
+  { to, replace, state: _state, children, ...rest },
   ref,
 ) {
   return (
-    // @ts-expect-error TanStack Link accepts string `to` for static paths.
-    <TLink ref={ref} to={to as string} replace={replace as boolean | undefined} {...rest}>
-      {children as React.ReactNode}
-    </TLink>
+    <AnyLink ref={ref} to={to} replace={replace} {...rest}>
+      {children}
+    </AnyLink>
   );
 });
 
-interface NavLinkCompatProps {
+export interface NavLinkProps {
   to: string;
   end?: boolean;
   replace?: boolean;
@@ -32,34 +31,30 @@ interface NavLinkCompatProps {
   children?: React.ReactNode | ((p: { isActive: boolean; isPending: boolean }) => React.ReactNode);
   activeClassName?: string;
   pendingClassName?: string;
-  [key: string]: unknown;
+  [key: string]: any;
 }
 
-export const NavLink = React.forwardRef<HTMLAnchorElement, NavLinkCompatProps>(function NavLink(
+export const NavLink = React.forwardRef<HTMLAnchorElement, NavLinkProps>(function NavLink(
   { to, end, className, activeClassName, pendingClassName, children, ...rest },
   ref,
 ) {
   return (
-    // @ts-expect-error
-    <TLink
+    <AnyLink
       ref={ref}
       to={to}
       activeOptions={{ exact: !!end }}
       {...rest}
-      className={(state: { isActive: boolean }) => {
-        const ctx = { isActive: state.isActive, isPending: false };
+      className={(state: any) => {
+        const ctx = { isActive: !!state?.isActive, isPending: false };
         const base = typeof className === "function" ? className(ctx) : className;
         return cn(base, ctx.isActive && activeClassName, ctx.isPending && pendingClassName);
       }}
     >
       {typeof children === "function"
-        ? (state: { isActive: boolean }) =>
-            (children as (p: { isActive: boolean; isPending: boolean }) => React.ReactNode)({
-              isActive: state.isActive,
-              isPending: false,
-            })
+        ? ((state: any) =>
+            (children as any)({ isActive: !!state?.isActive, isPending: false })) as any
         : children}
-    </TLink>
+    </AnyLink>
   );
 });
 
@@ -71,7 +66,7 @@ export function useNavigate() {
         if (typeof window !== "undefined") window.history.go(to);
         return;
       }
-      navigate({ to, replace: opts?.replace });
+      navigate({ to: to as any, replace: opts?.replace });
     },
     [navigate],
   );
@@ -82,6 +77,5 @@ export function useLocation() {
 }
 
 export function Navigate({ to, replace }: { to: string; replace?: boolean }) {
-  // @ts-expect-error
-  return <TNavigate to={to} replace={replace} />;
+  return <AnyNavigate to={to} replace={replace} />;
 }
