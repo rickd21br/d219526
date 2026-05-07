@@ -321,6 +321,41 @@ export function IceBreakerHero() {
         </div>
         </div>
       </div>
+
+      <Dialog open={!!resumePrompt} onOpenChange={(o) => !o && setResumePrompt(null)}>
+        <DialogContent className="max-w-xs">
+          <DialogHeader>
+            <DialogTitle>Continuar de onde parou?</DialogTitle>
+            <DialogDescription>
+              Você ouviu até {resumePrompt ? `${Math.floor(resumePrompt.saved / 60)}:${Math.floor(resumePrompt.saved % 60).toString().padStart(2, "0")}` : "0:00"} deste bloco.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-col">
+            <button
+              type="button"
+              onClick={() => {
+                if (!resumePrompt) return;
+                const t = resumePrompt;
+                setResumePrompt(null);
+                resumeFrom(t.saved);
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-glow active:scale-[0.98]"
+            >
+              <Play className="h-4 w-4" /> Continuar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setResumePrompt(null);
+                resumeFrom(0);
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-secondary px-4 py-2.5 text-sm font-bold active:scale-[0.98]"
+            >
+              <RotateCcw className="h-4 w-4" /> Reiniciar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
