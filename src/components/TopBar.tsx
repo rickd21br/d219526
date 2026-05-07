@@ -72,6 +72,16 @@ export function TopBar() {
           )}
         </button>
 
+        {/* Highlights */}
+        <button
+          type="button"
+          onClick={() => setHighlightsOpen(true)}
+          aria-label="Destaques do plano"
+          className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-soft transition-smooth hover:bg-secondary text-primary"
+        >
+          <Sparkles className="h-5 w-5" strokeWidth={2} />
+        </button>
+
         {/* Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
