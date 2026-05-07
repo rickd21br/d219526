@@ -303,7 +303,15 @@ const CAT_COLORS: Record<string, string> = {
 
 function CatCard({ icon, color, label, count, onOpen, onAdd }: { icon: React.ReactNode; color: string; label: string; count: number; onOpen: () => void; onAdd: () => void }) {
   return (
-    <div className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
+    <div className="relative flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
+      <button
+        type="button"
+        onClick={(e) => { e.stopPropagation(); toast.info(`Áudio-tutorial de ${label}: em breve`); }}
+        aria-label={`Áudio-tutorial ${label}`}
+        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25"
+      >
+        <Volume2 className="h-3 w-3" />
+      </button>
       <div className={cn("flex h-10 w-10 items-center justify-center rounded-xl", CAT_COLORS[color])}>{icon}</div>
       <p className="text-xl font-extrabold">{count}</p>
       <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
