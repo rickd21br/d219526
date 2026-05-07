@@ -1,6 +1,7 @@
 import { MobileShell } from "@/components/MobileShell";
 import { useTransactions, useJourney, formatCurrency } from "@/hooks/useFinance";
 import { useStorage } from "@/hooks/useStorage";
+import { Switch } from "@/components/ui/switch";
 import {
   PieChart, Pie, Cell, ResponsiveContainer,
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
