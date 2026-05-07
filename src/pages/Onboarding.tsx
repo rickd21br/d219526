@@ -364,14 +364,18 @@ const Onboarding = () => {
         </header>
 
         {/* HEADLINE */}
-        <div className="mt-3 space-y-1.5">
-          <h1 className="text-[22px] font-extrabold leading-tight tracking-tight text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)] sm:text-2xl">
+        <div className="-mt-2 space-y-2">
+          <h1 className="font-display text-[34px] font-normal leading-[0.95] tracking-wide text-white drop-shadow-[0_2px_8px_rgba(0,0,0,0.65)] sm:text-[38px]">
             O FUTURO QUE VOCÊ QUER
             <br />
-            COMEÇA <span className="text-primary">COM UMA DECISÃO</span>
+            COMEÇA <span className="text-primary">COM UMA DECISÃO.</span>
           </h1>
-          <p className="text-sm leading-snug text-white/80 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
+          <p className="font-display text-lg leading-tight tracking-wide text-white/90 drop-shadow-[0_1px_4px_rgba(0,0,0,0.6)]">
             Disciplina hoje. Liberdade amanhã.
+          </p>
+          <p className="flex items-center gap-2 text-[13px] leading-snug text-white/75">
+            <Lightbulb className="h-4 w-4 shrink-0" aria-hidden />
+            Confirme seus dados para personalizar sua experiência no app.
           </p>
         </div>
 
