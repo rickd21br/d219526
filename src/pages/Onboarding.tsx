@@ -354,10 +354,10 @@ const Onboarding = () => {
 
       <div
         className="relative z-10 mx-auto flex min-h-full w-full max-w-md flex-col px-5 pb-8 sm:max-w-lg sm:px-6"
-        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 1rem)" }}
+        style={{ paddingTop: "calc(env(safe-area-inset-top, 0px) + 2.25rem)" }}
       >
-        {/* HEADER (apenas a logomarca dourada, alinhada à esquerda do container) */}
-        <header className="-ml-5 flex items-center sm:-ml-6">
+        {/* HEADER (logomarca alinhada à esquerda do conteúdo) */}
+        <header className="flex items-center">
           <img
             src={desafio21}
             alt="Desafio 21 Dias - Disciplina hoje. Liberdade amanhã."
@@ -366,7 +366,7 @@ const Onboarding = () => {
         </header>
 
         {/* HEADLINE */}
-        <div className="mt-4 space-y-3">
+        <div className="mt-5 space-y-3 pt-2">
           <img
             src={headlineFuturo}
             alt="O futuro que você quer começa com uma decisão. Disciplina hoje. Liberdade amanhã."
@@ -377,6 +377,7 @@ const Onboarding = () => {
             Preencha os dados abaixo para acessar o app.
           </p>
         </div>
+
 
         {/* ============ STEP: FORM ============ */}
         {step === "form" && (
