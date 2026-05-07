@@ -34,6 +34,27 @@ const COLOR_BALANCE = "hsl(217 91% 55%)"; // azul — confiança, saldo
 const Reports = () => {
   const { transactions, totals } = useTransactions();
   const { progress } = useJourney();
+  const [bizProducts] = useStorage<BizProduct[]>("d21.mn.products", []);
+  const [bizServices] = useStorage<BizService[]>("d21.mn.services", []);
+  const [bizInfos] = useStorage<BizInfo[]>("d21.mn.infoproducts", []);
+
+  const bizSummary = useMemo(() => {
+    const prodReceita = bizProducts.reduce((s, p) => s + p.price, 0);
+    const servReceita = bizServices.reduce((s, p) => s + p.amount, 0);
+    const infoReceita = bizInfos.reduce((s, p) => s + (p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission), 0);
+    const margens = bizProducts.filter((p) => p.cost > 0).map((p) => ((p.price - p.cost) / p.cost) * 100);
+    const margemMedia = margens.length ? margens.reduce((a, b) => a + b, 0) / margens.length : 0;
+    return {
+      total: bizProducts.length + bizServices.length + bizInfos.length,
+      receita: prodReceita + servReceita + infoReceita,
+      margemMedia,
+      byCat: [
+        { name: "Produtos", value: prodReceita, count: bizProducts.length },
+        { name: "Serviços", value: servReceita, count: bizServices.length },
+        { name: "Infoprodutos", value: infoReceita, count: bizInfos.length },
+      ],
+    };
+  }, [bizProducts, bizServices, bizInfos]);
 
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
