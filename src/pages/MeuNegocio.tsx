@@ -1,7 +1,7 @@
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { useStorage } from "@/hooks/useStorage";
-import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon, ChevronLeft, Package, Wrench, GraduationCap, Sprout, Volume2, MoreVertical, Eye } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, Search, Upload, ImageIcon, ChevronLeft, Package, Wrench, GraduationCap, Sprout, Volume2, MoreVertical, Eye, ArrowUp } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -248,17 +248,14 @@ const MeuNegocio = () => {
           <section>
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-bold uppercase text-muted-foreground">Seus negócios</p>
-              <button onClick={() => setCat("produtos")} className="text-xs font-semibold text-blue-600">+ Adicionar</button>
             </div>
             <ul className="space-y-2">
-              {products.slice(0, 2).map((p) => <BizCard key={p.id} image={p.image} name={p.name} badge="Produto" badgeColor="emerald" lines={[`Estoque: — • Preço: ${fmtBRL(p.price)}`, `Margem: ${p.cost > 0 ? (((p.price - p.cost) / p.cost) * 100).toFixed(0) : 0}% • Receita: ${fmtBRL(p.price)}`]} onEdit={() => setEditProd(p)} onDelete={() => { if (confirm("Excluir?")) removeProduct(p.id); }} />)}
-              {services.slice(0, 1).map((s) => <BizCard key={s.id} image={s.image} name={s.name} badge="Serviço" badgeColor="blue" lines={[`Tipo: ${s.type === "recorrente" ? "Recorrente" : "Único"} • Preço: ${fmtBRL(s.amount)}`, `Receita: ${fmtBRL(s.amount)}`]} onEdit={() => setEditServ(s)} onDelete={() => { if (confirm("Excluir?")) removeService(s.id); }} />)}
-              {infos.slice(0, 1).map((i) => <BizCard key={i.id} image={i.image} name={i.name} badge="Infoproduto" badgeColor="violet" lines={[`Plataforma: ${i.platform} • Preço: ${fmtBRL(i.price)}`, `Vendas: — • Receita: ${fmtBRL(i.price)}`]} onEdit={() => setEditInfo(i)} onDelete={() => { if (confirm("Excluir?")) removeInfo(i.id); }} />)}
+              {products.map((p) => <BizCard key={`p-${p.id}`} image={p.image} name={p.name} badge="Produto" badgeColor="emerald" lines={[`Preço: ${fmtBRL(p.price)}`, `Margem: ${p.cost > 0 ? (((p.price - p.cost) / p.cost) * 100).toFixed(0) : 0}% • Receita: ${fmtBRL(p.price)}`]} onEdit={() => setEditProd(p)} onDelete={() => { if (confirm("Excluir?")) removeProduct(p.id); }} />)}
+              {services.map((s) => <BizCard key={`s-${s.id}`} image={s.image} name={s.name} badge="Serviço" badgeColor="blue" lines={[`Tipo: ${s.type === "recorrente" ? "Recorrente" : "Único"} • Preço: ${fmtBRL(s.amount)}`, `Receita: ${fmtBRL(s.amount)}`]} onEdit={() => setEditServ(s)} onDelete={() => { if (confirm("Excluir?")) removeService(s.id); }} />)}
+              {infos.map((i) => <BizCard key={`i-${i.id}`} image={i.image} name={i.name} badge="Infoproduto" badgeColor="violet" lines={[`Plataforma: ${i.platform} • Preço: ${fmtBRL(i.price)}`, `Receita: ${fmtBRL(i.price)}`]} onEdit={() => setEditInfo(i)} onDelete={() => { if (confirm("Excluir?")) removeInfo(i.id); }} />)}
               {totalAtivos === 0 && <p className="py-6 text-center text-sm text-muted-foreground">Nenhum negócio ainda.</p>}
             </ul>
-            {totalAtivos > 0 && (
-              <button onClick={() => setCat("produtos")} className="mt-3 w-full rounded-2xl border border-border bg-card py-2.5 text-sm font-semibold">Ver todos os negócios</button>
-            )}
+            {totalAtivos > 6 && <BackToTop />}
           </section>
 
           <Dialog open={!!editProd} onOpenChange={(o) => !o && setEditProd(null)}>
@@ -300,6 +297,26 @@ const CAT_COLORS: Record<string, string> = {
   blue: "bg-blue-500/15 text-blue-600",
   violet: "bg-violet-500/15 text-violet-600",
 };
+
+function BackToTop() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!show) return null;
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Voltar ao topo"
+      className="fixed bottom-24 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700"
+    >
+      <ArrowUp className="h-5 w-5" />
+    </button>
+  );
+}
 
 function CatCard({ icon, color, label, count, onOpen, onAdd }: { icon: React.ReactNode; color: string; label: string; count: number; onOpen: () => void; onAdd: () => void }) {
   return (
