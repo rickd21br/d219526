@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { INSPIRATION_LIBRARY, InspirationAudio, InspirationTrack } from "@/data/inspirationLibrary";
-import { Headphones, Pause, Play, ChevronDown, ListMusic, Star, Trophy, RotateCcw, LayoutGrid, Rows3 } from "lucide-react";
+import { Headphones, Pause, Play, ChevronDown, ListMusic, Star, Trophy, RotateCcw, LayoutGrid, Rows3, Save, Gauge } from "lucide-react";
 import { useStorage } from "@/hooks/useStorage";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -61,6 +61,11 @@ function BonusAudioCard({
   onRate,
   completed,
   variant,
+  currentTime,
+  duration,
+  speed,
+  onSpeedChange,
+  onSaveProgress,
 }: {
   item: InspirationAudio;
   playingId: string | null;
@@ -70,9 +75,20 @@ function BonusAudioCard({
   onRate: (v: number) => void;
   completed: boolean;
   variant: "grid" | "list";
+  currentTime: number;
+  duration: number;
+  speed: number;
+  onSpeedChange: (s: number) => void;
+  onSaveProgress: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const isList = variant === "list";
+  const fmt = (s: number) => {
+    if (!isFinite(s) || s < 0) s = 0;
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return `${m}:${sec.toString().padStart(2, "0")}`;
+  };
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-elevated">
@@ -143,23 +159,53 @@ function BonusAudioCard({
                   const selected = currentId === track.id;
                   const playing = playingId === track.id;
                   return (
-                    <button
-                      key={track.id}
-                      type="button"
-                      onClick={() => onTrackPlay(item, track)}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-xl px-2 py-1.5 text-left transition-smooth active:scale-[0.98]",
-                        selected ? "bg-primary text-primary-foreground shadow-soft" : "bg-card hover:bg-card/80"
+                    <div key={track.id} className={cn("rounded-xl transition-smooth", selected ? "bg-primary text-primary-foreground shadow-soft" : "bg-card hover:bg-card/80")}>
+                      <button
+                        type="button"
+                        onClick={() => onTrackPlay(item, track)}
+                        className="flex w-full items-center gap-2 px-2 py-1.5 text-left active:scale-[0.98]"
+                      >
+                        <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full", selected ? "bg-primary-foreground/15" : "bg-primary/10 text-primary")}>
+                          {playing ? <Pause className="h-3 w-3" /> : <Play className="ml-0.5 h-3 w-3" />}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[11px] font-bold">{track.title}</span>
+                          <span className={cn("block text-[9px]", selected ? "text-primary-foreground/80" : "text-muted-foreground")}>Faixa {index + 1}</span>
+                        </span>
+                      </button>
+                      {selected && (
+                        <div className="space-y-1.5 border-t border-primary-foreground/20 px-2 pb-2 pt-1.5">
+                          <Progress value={duration ? (currentTime / duration) * 100 : 0} className="h-1 bg-primary-foreground/20" />
+                          <div className="flex items-center justify-between gap-2 text-[9px] font-semibold">
+                            <span className="tabular-nums">{fmt(currentTime)} / {fmt(duration)}</span>
+                            <div className="flex items-center gap-1.5">
+                              <Gauge className="h-3 w-3 opacity-80" />
+                              <select
+                                value={speed}
+                                onChange={(e) => { e.stopPropagation(); onSpeedChange(Number(e.target.value)); }}
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label="Velocidade"
+                                className="rounded-full bg-primary-foreground/15 px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground outline-none"
+                              >
+                                <option className="text-foreground" value={0.75}>0.75x</option>
+                                <option className="text-foreground" value={1}>1x</option>
+                                <option className="text-foreground" value={1.25}>1.25x</option>
+                                <option className="text-foreground" value={1.5}>1.5x</option>
+                                <option className="text-foreground" value={2}>2x</option>
+                              </select>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onSaveProgress(); }}
+                                aria-label="Salvar ponto de reprodução"
+                                className="flex items-center gap-1 rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[9px] font-bold transition-smooth active:scale-95"
+                              >
+                                <Save className="h-3 w-3" /> Salvar
+                              </button>
+                            </div>
+                          </div>
+                        </div>
                       )}
-                    >
-                      <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full", selected ? "bg-primary-foreground/15" : "bg-primary/10 text-primary")}>
-                        {playing ? <Pause className="h-3 w-3" /> : <Play className="ml-0.5 h-3 w-3" />}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="block truncate text-[11px] font-bold">{track.title}</span>
-                        <span className={cn("block text-[9px]", selected ? "text-primary-foreground/80" : "text-muted-foreground")}>Faixa {index + 1}</span>
-                      </span>
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -204,7 +250,7 @@ function AudioPlayer({
           {playing ? <Pause className="h-5 w-5" strokeWidth={3} /> : <Play className="ml-0.5 h-5 w-5" strokeWidth={3} />}
         </button>
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold uppercase tracking-wide text-primary">Player do bônus exclusivo</p>
+          <p className="text-[10px] font-bold uppercase tracking-wide text-primary">Você chegou até aqui. Não pare agora.</p>
           <h2 className="truncate text-sm font-bold leading-tight">{track ? track.title : "Selecione um audiobook"}</h2>
           <p className="truncate text-xs text-muted-foreground">{track ? `${track.collection} • ${track.subtitle}` : "As faixas aparecem dentro de cada capa."}</p>
         </div>
@@ -232,10 +278,12 @@ function AudioPlayer({
 const Audios = () => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const victoryRef = useRef<HTMLAudioElement | null>(null);
-  const [currentTrack, setCurrentTrack] = useState<PlayerTrack | null>(null);
+  const [currentTrack, setCurrentTrack] = useStorage<PlayerTrack | null>("d21.bonusLastTrack", null);
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [playerProgress, setPlayerProgress] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
   const [speed, setSpeed] = useState(1);
   const [resumePrompt, setResumePrompt] = useState<{ track: PlayerTrack; saved: number } | null>(null);
   const [trophyBook, setTrophyBook] = useState<InspirationAudio | null>(null);
@@ -277,7 +325,7 @@ const Audios = () => {
 
   const playTrack = (track: PlayerTrack) => {
     const audio = audioRef.current;
-    if (currentTrack?.id === track.id && audio) {
+    if (currentTrack?.id === track.id && audio && audio.src) {
       if (audio.paused) {
         audio.play().then(() => setPlayingId(track.id)).catch(() => toast.error("Não consegui retomar."));
       } else {
@@ -312,6 +360,8 @@ const Audios = () => {
     if (!audio || !audio.duration || !isFinite(audio.duration) || !currentTrack) return;
     const pct = (audio.currentTime / audio.duration) * 100;
     setPlayerProgress(pct);
+    setCurrentTime(audio.currentTime);
+    setDuration(audio.duration);
     savePosition(currentTrack.id, audio.currentTime, audio.duration);
 
     if (pct >= 95 && !completedRef.current) {
@@ -325,6 +375,16 @@ const Audios = () => {
         }
       }
     }
+  };
+
+  const handleSaveProgress = () => {
+    const audio = audioRef.current;
+    if (!audio || !currentTrack || !audio.duration) {
+      toast.error("Nada para salvar ainda.");
+      return;
+    }
+    savePosition(currentTrack.id, audio.currentTime, audio.duration);
+    toast.success("Ponto salvo. Você pode continuar depois.");
   };
 
   const formatTime = (s: number) => {
@@ -391,6 +451,11 @@ const Audios = () => {
             }}
             completed={isBookCompleted(item.id)}
             variant={view}
+            currentTime={currentTime}
+            duration={duration || (currentTrack ? 0 : 0)}
+            speed={speed}
+            onSpeedChange={setSpeed}
+            onSaveProgress={handleSaveProgress}
           />
         ))}
       </section>
@@ -399,6 +464,7 @@ const Audios = () => {
         ref={audioRef}
         preload="metadata"
         onTimeUpdate={handleTimeUpdate}
+        onLoadedMetadata={(e) => setDuration((e.target as HTMLAudioElement).duration || 0)}
         onEnded={() => {
           setPlayingId(null);
           setPlayerProgress(100);
