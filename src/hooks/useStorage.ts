@@ -45,7 +45,7 @@ export function useStorage<T>(key: string, initialValue: T) {
   const loadRecord = useServerFn(loadAppRecord);
   const saveRecord = useServerFn(saveAppRecord);
   const initialRef = useRef(initialValue);
-  const resolveKey = () => scopedKey(key);
+  const resolveKey = useCallback(() => scopedKey(key), [key]);
   const initialStorageKey = typeof window === "undefined" ? key : resolveKey();
   const [storageKey, setStorageKey] = useState(initialStorageKey);
   const hadLocalValueRef = useRef(false);
@@ -140,7 +140,7 @@ export function useStorage<T>(key: string, initialValue: T) {
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("d21:session-change", onSessionChange);
     };
-  }, [key, storageKey]);
+  }, [resolveKey, storageKey]);
 
   const setValue = useCallback<typeof setValueState>(
     (next) => {
