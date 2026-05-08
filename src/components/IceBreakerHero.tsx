@@ -353,6 +353,8 @@ function AudioListItem({
   const onEnded = () => {
     setPlaying(false);
     onDeactivate();
+    setXpBurst(true);
+    window.setTimeout(() => setXpBurst(false), 1800);
     onComplete();
   };
 
