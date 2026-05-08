@@ -762,7 +762,7 @@ const Onboarding = () => {
             onClick={closeUpdateModal}
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
           />
-          <div className="relative w-full max-w-sm rounded-3xl border border-white/15 bg-card p-6 shadow-floating animate-bounce-in">
+          <div className="relative w-full max-w-sm rounded-3xl border border-white/15 bg-card p-6 shadow-floating animate-in fade-in-0 slide-in-from-top-4 duration-300 ease-out">
             <button
               type="button"
               aria-label="Fechar"

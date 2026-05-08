@@ -6,7 +6,7 @@ import { WeeklyChart } from "@/components/WeeklyChart";
 import { GoalsCard } from "@/components/GoalsCard";
 import { AddTransactionDialog } from "@/components/AddTransactionDialog";
 import { IceBreakerHero } from "@/components/IceBreakerHero";
-import { DailyTip } from "@/components/DailyTip";
+import { TipsCarousel } from "@/components/TipsCarousel";
 import { ArrowDownRight, ArrowUpRight, Wallet, Receipt, Pencil, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@/lib/router-compat";
 import { format, parseISO } from "date-fns";
@@ -86,9 +86,6 @@ const Home = () => {
       {/* MENTOR DO PROGRESSO ONLINE — primeiro acesso */}
       <IceBreakerHero />
 
-      {/* DICA DO DIA */}
-      <DailyTip />
-
       {/* SALDO */}
       <section className="relative mt-5 overflow-hidden rounded-3xl gradient-card p-6 text-primary-foreground shadow-elevated">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
@@ -122,6 +119,9 @@ const Home = () => {
           </div>
         </div>
       </section>
+
+      {/* DICAS DO DIA — slider infinito abaixo do Saldo */}
+      <TipsCarousel />
 
       {/* INÍCIO — 3 cards abaixo do Mentor */}
       <section className="mt-5 overflow-visible">
