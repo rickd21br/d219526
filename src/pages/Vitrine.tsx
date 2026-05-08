@@ -1,5 +1,5 @@
 import { MobileShell } from "@/components/MobileShell";
-import { ExternalLink, Megaphone, Store } from "lucide-react";
+import { ExternalLink, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 import sv1 from "@/assets/vitrine-sv1.png";
 import sv2 from "@/assets/vitrine-sv2.png";
@@ -7,6 +7,9 @@ import sv3 from "@/assets/vitrine-sv3.png";
 import jp1 from "@/assets/vitrine-jp1.png";
 import jp2 from "@/assets/vitrine-jp2.png";
 import jp3 from "@/assets/vitrine-jp3.png";
+import an1 from "@/assets/vitrine-anuncie1.png";
+import an2 from "@/assets/vitrine-anuncie2.png";
+import an3 from "@/assets/vitrine-anuncie3.png";
 
 function AutoCarousel({ images, alt }: { images: string[]; alt: string }) {
   const [idx, setIdx] = useState(0);
@@ -15,14 +18,14 @@ function AutoCarousel({ images, alt }: { images: string[]; alt: string }) {
     return () => clearInterval(id);
   }, [images.length]);
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl bg-black aspect-[3/4]">
+    <div className="relative w-full overflow-hidden rounded-2xl bg-black aspect-[2/3]">
       {images.map((src, i) => (
         <img
           key={i}
           src={src}
           alt={`${alt} ${i + 1}`}
           loading="lazy"
-          className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 ${
+          className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-700 ${
             i === idx ? "opacity-100" : "opacity-0"
           }`}
         />
@@ -45,6 +48,12 @@ const PRODUCTS = [
   {
     title: "Método Sociedade Viral",
     description: "Estratégias para crescer e viralizar no digital.",
+    bullets: [
+      "Reels que vendem no automático",
+      "Cortes que escalam alcance",
+      "Múltiplas fontes de renda",
+      "Estratégias validadas por resultados",
+    ],
     url: "https://kiwify.app/fCHyZSL?afid=xPHPNStm",
     images: [sv1, sv2, sv3],
     cta: "Acessar oferta",
@@ -52,6 +61,12 @@ const PRODUCTS = [
   {
     title: "Desafio 21 Dias — Jornada do Progresso",
     description: "Transforme sua relação com o dinheiro em 21 dias.",
+    bullets: [
+      "Mentoria diária guiada",
+      "App calculadora de pagamentos",
+      "Planejamento e controle real",
+      "Disciplina hoje, liberdade amanhã",
+    ],
     url: "https://kiwify.app/AaBECZ6?afid=4UF5JUi5",
     images: [jp1, jp2, jp3],
     cta: "Acessar oferta",
@@ -59,8 +74,14 @@ const PRODUCTS = [
   {
     title: "Anuncie aqui",
     description: "Seu produto em destaque para milhares de pessoas. Fale comigo no Instagram.",
+    bullets: [
+      "Mais de 10.000 usuários ativos",
+      "Público qualificado e engajado",
+      "Sua marca em evidência todos os dias",
+      "Parceria que gera resultados reais",
+    ],
     url: "https://instagram.com/eu.rickbr",
-    images: [],
+    images: [an1, an2, an3],
     cta: "Anunciar",
   },
 ];
@@ -84,21 +105,19 @@ const Vitrine = () => {
             key={p.url}
             className="overflow-hidden rounded-3xl border border-red-500/20 bg-card p-4 shadow-floating"
           >
-            {p.images.length > 0 ? (
-              <AutoCarousel images={p.images} alt={p.title} />
-            ) : (
-              <div className="flex aspect-[3/4] w-full flex-col items-center justify-center gap-3 rounded-2xl bg-gradient-to-br from-red-500/10 via-card to-red-700/10 p-6 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500 to-red-700 text-white shadow-lg">
-                  <Megaphone className="h-8 w-8" />
-                </div>
-                <p className="text-xl font-bold">Anuncie aqui</p>
-                <p className="text-sm text-muted-foreground">
-                  Coloque seu produto em destaque na vitrine para milhares de pessoas.
-                </p>
-              </div>
-            )}
+            <AutoCarousel images={p.images} alt={p.title} />
             <h2 className="mt-4 text-base font-bold leading-snug">{p.title}</h2>
             <p className="mt-1 text-sm text-muted-foreground">{p.description}</p>
+            {p.bullets && (
+              <ul className="mt-3 space-y-1.5">
+                {p.bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-xs text-foreground/80">
+                    <span className="mt-1 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-red-500" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
             <a
               href={p.url}
               target="_blank"
