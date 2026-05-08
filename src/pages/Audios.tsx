@@ -257,6 +257,8 @@ function AudioPlayer({
   onPrev,
   onNext,
   onSave,
+  collapsed,
+  onToggleCollapsed,
 }: {
   track: PlayerTrack | null;
   playing: boolean;
@@ -272,6 +274,8 @@ function AudioPlayer({
   onPrev: () => void;
   onNext: () => void;
   onSave: () => void;
+  collapsed: boolean;
+  onToggleCollapsed: () => void;
 }) {
   const fmt = (s: number) => {
     if (!isFinite(s) || s < 0) s = 0;
@@ -282,9 +286,20 @@ function AudioPlayer({
     const ss = sec.toString().padStart(2, "0");
     return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
   };
+  const headlineTitle = track ? (track.collection || track.title) : "Selecione um audiobook";
+  const headlineSub = track ? track.title : "Você chegou até aqui. Não pare agora.";
   return (
-    <section className="sticky top-3 z-30 mb-5 overflow-hidden rounded-[1.35rem] p-4 text-primary-foreground shadow-floating backdrop-blur" style={{ background: "var(--gradient-card)" }}>
-      <div className="flex items-start gap-3">
+    <section className="relative mb-5 overflow-hidden rounded-[1.35rem] p-4 text-primary-foreground shadow-floating backdrop-blur" style={{ background: "var(--gradient-card)" }}>
+      <button
+        type="button"
+        onClick={onToggleCollapsed}
+        aria-label={collapsed ? "Expandir player" : "Recolher player"}
+        aria-expanded={!collapsed}
+        className="absolute right-3 top-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-black/25 text-primary-foreground active:scale-95"
+      >
+        <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", collapsed && "rotate-180")} strokeWidth={2.5} />
+      </button>
+      <div className="flex items-start gap-3 pr-8">
         <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-black/15 ring-1 ring-white/10">
           <BookOpen className="h-7 w-7 text-primary-foreground/90" strokeWidth={2} />
           <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground text-primary shadow-soft">
@@ -292,12 +307,14 @@ function AudioPlayer({
           </span>
         </div>
         <div className="min-w-0 flex-1">
-          <span className="inline-block rounded-full bg-black/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">Audio</span>
-          <h2 className="mt-1 truncate text-base font-bold leading-tight">{track ? track.title : "Selecione um audiobook"}</h2>
-          <p className="truncate text-xs text-primary-foreground/80">{track ? track.subtitle : "Você chegou até aqui. Não pare agora."}</p>
+          <span className="inline-block rounded-full bg-black/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">Áudio</span>
+          <h2 className="mt-1 truncate text-base font-bold leading-tight">{headlineTitle}</h2>
+          <p className="truncate text-xs text-primary-foreground/80">{headlineSub}</p>
         </div>
       </div>
 
+      <div className={cn("grid transition-all duration-300 ease-out", collapsed ? "grid-rows-[0fr] opacity-0" : "grid-rows-[1fr] opacity-100")}>
+        <div className="overflow-hidden">
       <div className="mt-4">
         <input
           type="range"
@@ -327,25 +344,28 @@ function AudioPlayer({
         >
           {playing ? <Pause className="h-6 w-6" strokeWidth={3} /> : <Play className="ml-0.5 h-6 w-6" strokeWidth={3} />}
         </button>
-        <span className="mx-1 h-8 w-px bg-primary-foreground/20" />
-        <div className="relative ml-auto">
-          <select
-            aria-label="Velocidade do áudio"
-            value={speed}
-            onChange={(e) => onSpeedChange(Number(e.target.value))}
-            className="h-9 appearance-none rounded-full bg-black/20 pl-3 pr-7 text-xs font-bold text-primary-foreground outline-none"
-          >
-            <option className="text-foreground" value={0.75}>0.75x</option>
-            <option className="text-foreground" value={1}>1.0x</option>
-            <option className="text-foreground" value={1.25}>1.25x</option>
-            <option className="text-foreground" value={1.5}>1.5x</option>
-            <option className="text-foreground" value={2}>2.0x</option>
-          </select>
-          <ChevronDown className="pointer-events-none absolute right-2 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+        <div className="ml-auto flex items-center gap-1 rounded-full bg-black/20 p-1">
+          <div className="relative">
+            <select
+              aria-label="Velocidade do áudio"
+              value={speed}
+              onChange={(e) => onSpeedChange(Number(e.target.value))}
+              className="h-7 appearance-none rounded-full bg-transparent pl-2.5 pr-6 text-xs font-bold text-primary-foreground outline-none"
+            >
+              <option className="text-foreground" value={0.75}>0.75x</option>
+              <option className="text-foreground" value={1}>1.0x</option>
+              <option className="text-foreground" value={1.25}>1.25x</option>
+              <option className="text-foreground" value={1.5}>1.5x</option>
+              <option className="text-foreground" value={2}>2.0x</option>
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2" />
+          </div>
+          <button type="button" onClick={onSave} disabled={!track} aria-label="Salvar progresso" className="flex h-7 items-center gap-1.5 rounded-full px-2.5 text-xs font-bold text-primary-foreground active:scale-95 disabled:opacity-50">
+            <Save className="h-3.5 w-3.5" /> Salvar
+          </button>
         </div>
-        <button type="button" onClick={onSave} disabled={!track} aria-label="Salvar progresso" className="flex h-9 items-center gap-1.5 rounded-full bg-black/20 px-3 text-xs font-bold active:scale-95 disabled:opacity-50">
-          <Save className="h-4 w-4" /> Salvar
-        </button>
+      </div>
+        </div>
       </div>
     </section>
   );
@@ -364,6 +384,7 @@ const Audios = () => {
   const [resumePrompt, setResumePrompt] = useState<{ track: PlayerTrack; saved: number } | null>(null);
   const [trophyBook, setTrophyBook] = useState<InspirationAudio | null>(null);
   const completedRef = useRef(false);
+  const [playerCollapsed, setPlayerCollapsed] = useStorage<boolean>("d21.bonusPlayerCollapsed", false);
 
   const [view, setView] = useStorage<"grid" | "list">("d21.bonusView", "list");
 
@@ -509,6 +530,8 @@ const Audios = () => {
           if (next) selectInspirationTrack(book, next);
         }}
         onSave={handleSaveProgress}
+        collapsed={playerCollapsed}
+        onToggleCollapsed={() => setPlayerCollapsed(!playerCollapsed)}
       />
 
       <section className="mb-3 flex items-center justify-end gap-2">
