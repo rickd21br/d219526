@@ -528,6 +528,16 @@ const CAT_COLORS: Record<string, string> = {
   emerald: "bg-emerald-500/15 text-emerald-600",
   blue: "bg-blue-500/15 text-blue-600",
   violet: "bg-violet-500/15 text-violet-600",
+  amber: "bg-amber-500/15 text-amber-600",
+  sales: "bg-emerald-500/15 text-emerald-600",
+};
+
+const COUNT_COLOR: Record<string, string> = {
+  amber: "text-amber-500",
+  blue: "text-blue-600",
+  violet: "text-violet-600",
+  sales: "text-emerald-600",
+  emerald: "text-emerald-600",
 };
 
 function BackToTop() {
