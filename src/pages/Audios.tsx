@@ -480,6 +480,27 @@ const Audios = () => {
         speed={speed}
         onSpeedChange={setSpeed}
         onToggle={() => currentTrack && playTrack(currentTrack)}
+        currentTime={currentTime}
+        duration={duration}
+        onSeek={(sec) => { if (audioRef.current) audioRef.current.currentTime = sec; }}
+        onSkip={(delta) => { if (audioRef.current) audioRef.current.currentTime = Math.max(0, Math.min((audioRef.current.duration || 0), audioRef.current.currentTime + delta)); }}
+        onPrev={() => {
+          if (!currentTrack) return;
+          const book = INSPIRATION_LIBRARY.find((b) => b.id === currentTrack.bookId);
+          if (!book) return;
+          const idx = book.tracks.findIndex((t) => t.id === currentTrack.id);
+          const prev = book.tracks[idx - 1];
+          if (prev) selectInspirationTrack(book, prev);
+        }}
+        onNext={() => {
+          if (!currentTrack) return;
+          const book = INSPIRATION_LIBRARY.find((b) => b.id === currentTrack.bookId);
+          if (!book) return;
+          const idx = book.tracks.findIndex((t) => t.id === currentTrack.id);
+          const next = book.tracks[idx + 1];
+          if (next) selectInspirationTrack(book, next);
+        }}
+        onSave={handleSaveProgress}
       />
 
       <section className="mb-3 flex items-center justify-end gap-2">
