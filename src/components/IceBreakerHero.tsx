@@ -118,18 +118,6 @@ export function IceBreakerHero() {
                   );
                 })}
               </div>
-              <button
-                type="button"
-                onClick={() => setOpen((v) => !v)}
-                aria-label={open ? "Recolher" : "Expandir"}
-                aria-expanded={open}
-                className="ml-auto flex h-7 w-7 items-center justify-center rounded-full bg-[hsl(165_40%_7%)] text-[hsl(var(--primary-glow))] shadow-[inset_3px_3px_8px_hsl(165_50%_3%/0.8),_inset_-2px_-2px_6px_hsl(165_30%_14%/0.45)] transition-smooth active:scale-95"
-              >
-                <ChevronDown
-                  className={cn("h-4 w-4 transition-transform duration-300", open && "rotate-180")}
-                  strokeWidth={2.5}
-                />
-              </button>
             </div>
 
             <p className="mt-2 text-[11px] font-medium text-white/60">
