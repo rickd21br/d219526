@@ -408,17 +408,21 @@ const Onboarding = () => {
                   type="button"
                   aria-label="Ajuda / tutorial"
                   title="Ajuda"
-                  onClick={() => setTutorialOpen((v) => !v)}
+                  onClick={() => { setActiveIdx(0); setTutorialOpen((v) => !v); }}
                   onMouseEnter={() => { setHoverIdx(0); playShowcaseSound(); }}
                   onMouseLeave={() => setHoverIdx((i) => (i === 0 ? -1 : i))}
-                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 ${
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-primary/20 hover:border-primary/60 hover:text-primary hover:shadow-[0_0_18px_hsl(var(--primary)/0.55)] ${
+                    activeIdx === 0
+                      ? "border-primary/70 bg-primary/20 text-primary shadow-[0_0_18px_hsl(var(--primary)/0.55)]"
+                      : "border-white/30 bg-white/10 text-white"
+                  } ${
                     showcaseIdx === 0 || hoverIdx === 0
                       ? "scale-125 ring-2 ring-white/60 shadow-[0_0_18px_rgba(255,255,255,0.55),0_0_36px_rgba(255,255,255,0.25)]"
                       : ""
                   }`}
                 >
-                  {(showcaseIdx === 0 || hoverIdx === 0) && (
-                    <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
+                  {(showcaseIdx === 0 || hoverIdx === 0 || activeIdx === 0) && (
+                    <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-center text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
                       Ajuda
                     </span>
                   )}
@@ -439,19 +443,21 @@ const Onboarding = () => {
                   type="button"
                   aria-label="Atualizar app"
                   title={needRefresh ? "Nova versão disponível!" : "Verificar atualização"}
-                  onClick={handleUpdate}
+                  onClick={() => { setActiveIdx(1); handleUpdate(); }}
                   onMouseEnter={() => { setHoverIdx(1); playShowcaseSound(); }}
                   onMouseLeave={() => setHoverIdx((i) => (i === 1 ? -1 : i))}
-                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 ${
-                    checking ? "opacity-70" : ""
-                  } ${
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-primary/20 hover:border-primary/60 hover:text-primary hover:shadow-[0_0_18px_hsl(var(--primary)/0.55)] ${
+                    activeIdx === 1
+                      ? "border-primary/70 bg-primary/20 text-primary shadow-[0_0_18px_hsl(var(--primary)/0.55)]"
+                      : "border-white/30 bg-white/10 text-white"
+                  } ${checking ? "opacity-70" : ""} ${
                     showcaseIdx === 1 || hoverIdx === 1
                       ? "scale-125 ring-2 ring-white/60 shadow-[0_0_18px_rgba(255,255,255,0.55),0_0_36px_rgba(255,255,255,0.25)]"
                       : ""
                   }`}
                 >
-                  {(showcaseIdx === 1 || hoverIdx === 1) && (
-                    <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
+                  {(showcaseIdx === 1 || hoverIdx === 1 || activeIdx === 1) && (
+                    <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-center text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
                       Atualizações
                     </span>
                   )}
@@ -475,17 +481,21 @@ const Onboarding = () => {
                   type="button"
                   aria-label="Instalar app"
                   title="Instalar app"
-                  onClick={handleInstall}
+                  onClick={() => { setActiveIdx(2); handleInstall(); }}
                   onMouseEnter={() => { setHoverIdx(2); playShowcaseSound(); }}
                   onMouseLeave={() => setHoverIdx((i) => (i === 2 ? -1 : i))}
-                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-white/10 text-white backdrop-blur-md transition-all duration-300 ${
+                  className={`relative flex h-11 w-11 items-center justify-center rounded-full border backdrop-blur-md transition-all duration-300 hover:scale-110 hover:bg-primary/20 hover:border-primary/60 hover:text-primary hover:shadow-[0_0_18px_hsl(var(--primary)/0.55)] ${
+                    activeIdx === 2
+                      ? "border-primary/70 bg-primary/20 text-primary shadow-[0_0_18px_hsl(var(--primary)/0.55)]"
+                      : "border-white/30 bg-white/10 text-white"
+                  } ${
                     showcaseIdx === 2 || hoverIdx === 2
                       ? "scale-125 ring-2 ring-white/60 shadow-[0_0_18px_rgba(255,255,255,0.55),0_0_36px_rgba(255,255,255,0.25)]"
                       : ""
                   }`}
                 >
-                  {(showcaseIdx === 2 || hoverIdx === 2) && (
-                    <span className="absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
+                  {(showcaseIdx === 2 || hoverIdx === 2 || activeIdx === 2) && (
+                    <span className="pointer-events-none absolute -bottom-7 left-1/2 -translate-x-1/2 whitespace-nowrap text-center text-[11px] font-bold tracking-wide text-white animate-fade-in [text-shadow:0_0_6px_rgba(255,255,255,0.9),0_0_14px_rgba(255,255,255,0.55),0_2px_4px_rgba(0,0,0,0.85)]">
                       Instalar app
                     </span>
                   )}
