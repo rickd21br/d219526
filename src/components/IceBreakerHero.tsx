@@ -405,7 +405,14 @@ function AudioListItem({
 
         {/* Texto */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold leading-tight">{audio.title}</p>
+          <p className="flex items-center gap-2 truncate text-sm font-bold leading-tight">
+            <span className="truncate">{audio.title}</span>
+            {xpBurst && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[hsl(45_95%_58%)] px-2 py-0.5 text-[10px] font-black text-[hsl(165_40%_8%)] shadow-[0_0_12px_hsl(45_95%_58%/0.7)] animate-scale-in">
+                +15 XP
+              </span>
+            )}
+          </p>
           <p className="truncate text-[11px] text-white/55">
             {audio.duration} · {audio.subtitle}
           </p>
