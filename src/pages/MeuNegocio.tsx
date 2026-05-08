@@ -298,6 +298,26 @@ const CAT_COLORS: Record<string, string> = {
   violet: "bg-violet-500/15 text-violet-600",
 };
 
+function BackToTop() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setShow(window.scrollY > 400);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  if (!show) return null;
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      aria-label="Voltar ao topo"
+      className="fixed bottom-24 right-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700"
+    >
+      <ArrowUp className="h-5 w-5" />
+    </button>
+  );
+}
+
 function CatCard({ icon, color, label, count, onOpen, onAdd }: { icon: React.ReactNode; color: string; label: string; count: number; onOpen: () => void; onAdd: () => void }) {
   return (
     <div className="relative flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
