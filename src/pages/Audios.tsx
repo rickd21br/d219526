@@ -159,51 +159,78 @@ function BonusAudioCard({
                   const selected = currentId === track.id;
                   const playing = playingId === track.id;
                   return (
-                    <div key={track.id} className={cn("rounded-xl transition-smooth", selected ? "bg-primary text-primary-foreground shadow-soft" : "bg-card hover:bg-card/80")}>
-                      <button
-                        type="button"
-                        onClick={() => onTrackPlay(item, track)}
-                        className="flex w-full items-center gap-2 px-2 py-1.5 text-left active:scale-[0.98]"
-                      >
-                        <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full", selected ? "bg-primary-foreground/15" : "bg-primary/10 text-primary")}>
-                          {playing ? <Pause className="h-3 w-3" /> : <Play className="ml-0.5 h-3 w-3" />}
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[11px] font-bold">{track.title}</span>
-                          <span className={cn("block text-[9px]", selected ? "text-primary-foreground/80" : "text-muted-foreground")}>Faixa {index + 1}</span>
-                        </span>
-                      </button>
-                      {selected && (
-                        <div className="space-y-1.5 border-t border-primary-foreground/20 px-2 pb-2 pt-1.5">
-                          <Progress value={duration ? (currentTime / duration) * 100 : 0} className="h-1 bg-primary-foreground/20" />
-                          <div className="flex items-center justify-between gap-2 text-[9px] font-semibold">
-                            <span className="tabular-nums">{fmt(currentTime)} / {fmt(duration)}</span>
-                            <div className="flex items-center gap-1.5">
-                              <Gauge className="h-3 w-3 opacity-80" />
-                              <select
-                                value={speed}
-                                onChange={(e) => { e.stopPropagation(); onSpeedChange(Number(e.target.value)); }}
-                                onClick={(e) => e.stopPropagation()}
-                                aria-label="Velocidade"
-                                className="rounded-full bg-primary-foreground/15 px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground outline-none"
-                              >
-                                <option className="text-foreground" value={0.75}>0.75x</option>
-                                <option className="text-foreground" value={1}>1x</option>
-                                <option className="text-foreground" value={1.25}>1.25x</option>
-                                <option className="text-foreground" value={1.5}>1.5x</option>
-                                <option className="text-foreground" value={2}>2x</option>
-                              </select>
-                              <button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); onSaveProgress(); }}
-                                aria-label="Salvar ponto de reprodução"
-                                className="flex items-center gap-1 rounded-full bg-primary-foreground/15 px-2 py-0.5 text-[9px] font-bold transition-smooth active:scale-95"
-                              >
-                                <Save className="h-3 w-3" /> Salvar
-                              </button>
+                    <div key={track.id}>
+                      {selected ? (
+                        <div
+                          className="flex items-center gap-2 rounded-2xl px-2 py-2 text-primary-foreground shadow-soft"
+                          style={{ background: "var(--gradient-card)" }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => onTrackPlay(item, track)}
+                            aria-label={playing ? "Pausar" : "Tocar"}
+                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground text-primary shadow-glow active:scale-95"
+                          >
+                            {playing ? <Pause className="h-4 w-4" strokeWidth={3} /> : <Play className="ml-0.5 h-4 w-4" strokeWidth={3} />}
+                          </button>
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-[11px] font-bold leading-tight">{track.title}</p>
+                            <input
+                              type="range"
+                              min={0}
+                              max={duration || 0}
+                              step={0.1}
+                              value={Math.min(currentTime, duration || 0)}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                if ((window as any).__bonusAudio) (window as any).__bonusAudio.currentTime = Number(e.target.value);
+                              }}
+                              onClick={(e) => e.stopPropagation()}
+                              aria-label="Posição"
+                              className="audio-range-mini mt-1 w-full"
+                              style={{ ['--pct' as any]: `${duration ? (currentTime / duration) * 100 : 0}%` }}
+                            />
+                            <div className="mt-0.5 flex items-center justify-between text-[9px] font-semibold tabular-nums">
+                              <span>{fmt(currentTime)}</span>
+                              <span>{fmt(duration)}</span>
                             </div>
                           </div>
+                          <select
+                            value={speed}
+                            onChange={(e) => { e.stopPropagation(); onSpeedChange(Number(e.target.value)); }}
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label="Velocidade"
+                            className="h-7 shrink-0 rounded-full bg-black/20 px-2 text-[10px] font-bold text-primary-foreground outline-none"
+                          >
+                            <option className="text-foreground" value={0.75}>0.75x</option>
+                            <option className="text-foreground" value={1}>1.0x</option>
+                            <option className="text-foreground" value={1.25}>1.25x</option>
+                            <option className="text-foreground" value={1.5}>1.5x</option>
+                            <option className="text-foreground" value={2}>2.0x</option>
+                          </select>
+                          <button
+                            type="button"
+                            onClick={(e) => { e.stopPropagation(); onSaveProgress(); }}
+                            aria-label="Salvar ponto"
+                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/20 active:scale-95"
+                          >
+                            <Save className="h-3.5 w-3.5" />
+                          </button>
                         </div>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => onTrackPlay(item, track)}
+                          className="flex w-full items-center gap-2 rounded-xl bg-card px-2 py-1.5 text-left transition-smooth hover:bg-card/80 active:scale-[0.98]"
+                        >
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                            <Play className="ml-0.5 h-3 w-3" />
+                          </span>
+                          <span className="min-w-0 flex-1">
+                            <span className="block truncate text-[11px] font-bold">{track.title}</span>
+                            <span className="block text-[9px] text-muted-foreground">Faixa {index + 1}</span>
+                          </span>
+                        </button>
                       )}
                     </div>
                   );
