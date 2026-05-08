@@ -149,9 +149,9 @@ const MeuNegocio = () => {
   const [extraPlatforms] = useStorage<string[]>("d21.mn.platforms", []);
   const platforms = [...FIXED_PLATFORMS, ...extraPlatforms];
 
-  const addProduct = (p: Product) => { setProducts((prev) => prev.some((x) => x.id === p.id) ? prev.map((x) => x.id === p.id ? p : x) : [p, ...prev]); setAddOpen(null); toast.success("Produto adicionado"); };
-  const addService = (s: Service) => { setServices((prev) => prev.some((x) => x.id === s.id) ? prev.map((x) => x.id === s.id ? s : x) : [s, ...prev]); setAddOpen(null); toast.success("Serviço adicionado"); };
-  const addInfo = (i: Infoproduct) => { setInfos((prev) => prev.some((x) => x.id === i.id) ? prev.map((x) => x.id === i.id ? i : x) : [i, ...prev]); setAddOpen(null); toast.success("Infoproduto adicionado"); };
+  const addProduct = (p: Product) => { setProducts((prev) => prev.some((x) => x.id === p.id) ? prev.map((x) => x.id === p.id ? p : x) : [p, ...prev]); setAddOpen(null); toast.success("Produto salvo"); };
+  const addService = (s: Service) => { setServices((prev) => prev.some((x) => x.id === s.id) ? prev.map((x) => x.id === s.id ? s : x) : [s, ...prev]); setAddOpen(null); toast.success("Serviço salvo"); };
+  const addInfo = (i: Infoproduct) => { setInfos((prev) => prev.some((x) => x.id === i.id) ? prev.map((x) => x.id === i.id ? i : x) : [i, ...prev]); setAddOpen(null); toast.success("Infoproduto salvo"); };
 
   const updateProduct = (p: Product) => setProducts((prev) => prev.map((x) => x.id === p.id ? p : x));
   const updateService = (s: Service) => setServices((prev) => prev.map((x) => x.id === s.id ? s : x));
@@ -168,7 +168,7 @@ const MeuNegocio = () => {
   const receitaPotencial =
     products.reduce((s, p) => s + p.price, 0) +
     services.reduce((s, x) => s + x.amount, 0) +
-    infos.reduce((s, x) => s + x.price, 0);
+    infos.reduce((s, x) => s + (x.commissionType === "percent" ? (x.price * x.commission) / 100 : x.commission), 0);
   const margens = products.filter((p) => p.cost > 0).map((p) => ((p.price - p.cost) / p.cost) * 100);
   const margemMedia = margens.length ? margens.reduce((a, b) => a + b, 0) / margens.length : 0;
 
