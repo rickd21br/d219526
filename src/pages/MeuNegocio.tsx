@@ -185,25 +185,25 @@ const MeuNegocio = () => {
           </header>
 
           <section className="rounded-2xl border border-border bg-card p-4 shadow-soft">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-bold uppercase text-muted-foreground">Resumo dos seus negócios</p>
-              <button className="text-xs font-semibold text-blue-600">Ver relatório</button>
+            <div className="flex items-center justify-between gap-2">
+              <p className="truncate text-[11px] font-bold uppercase tracking-tight text-muted-foreground">Resumo dos negócios</p>
+              <button className="shrink-0 text-[11px] font-semibold text-blue-600">Ver relatório</button>
             </div>
-            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-              <div>
-                <p className="text-[10px] uppercase text-muted-foreground">Negócios ativos</p>
-                <p className="text-xl font-extrabold">{totalAtivos}</p>
-                <p className="text-[10px] text-emerald-600">+2 este mês</p>
+            <div className="mt-3 grid grid-cols-3 gap-1.5 text-center">
+              <div className="min-w-0">
+                <p className="truncate text-[9px] font-semibold uppercase leading-tight text-muted-foreground">Ativos</p>
+                <p className="text-lg font-extrabold leading-tight">{totalAtivos}</p>
+                <p className="truncate text-[9px] leading-tight text-emerald-600">+2 este mês</p>
               </div>
-              <div>
-                <p className="text-[10px] uppercase text-muted-foreground">Receita potencial/mês</p>
-                <p className="text-xl font-extrabold">{fmtBRL(receitaPotencial)}</p>
-                <p className="text-[10px] text-muted-foreground">Projeção</p>
+              <div className="min-w-0">
+                <p className="truncate text-[9px] font-semibold uppercase leading-tight text-muted-foreground">Receita/mês</p>
+                <p className="truncate text-lg font-extrabold leading-tight">{fmtBRL(receitaPotencial)}</p>
+                <p className="truncate text-[9px] leading-tight text-muted-foreground">Projeção</p>
               </div>
-              <div>
-                <p className="text-[10px] uppercase text-muted-foreground">Margem média</p>
-                <p className="text-xl font-extrabold">{margemMedia.toFixed(0)}%</p>
-                <p className="text-[10px] text-emerald-600">{margemMedia >= 30 ? "Muito bom" : "Atenção"}</p>
+              <div className="min-w-0">
+                <p className="truncate text-[9px] font-semibold uppercase leading-tight text-muted-foreground">Margem</p>
+                <p className="text-lg font-extrabold leading-tight">{margemMedia.toFixed(0)}%</p>
+                <p className="truncate text-[9px] leading-tight text-emerald-600">{margemMedia >= 30 ? "Muito bom" : "Atenção"}</p>
               </div>
             </div>
           </section>

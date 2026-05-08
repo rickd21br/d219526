@@ -1,5 +1,5 @@
 import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import triggerIcon from "@/assets/highlights/trigger.png";
 import mentorIcon from "@/assets/highlights/mentor.png";
@@ -32,7 +32,7 @@ export function TopBar() {
   const [notifications, setNotifications] = useStorage<boolean>("d21.notifications", false);
   const navigate = useNavigate();
   const [highlightsOpen, setHighlightsOpen] = useState(false);
-  const [mentorOpen, setMentorOpen] = useState(false);
+  const [activeHighlight, setActiveHighlight] = useState<null | "mentor" | "pwa" | "planilhas" | "checklists" | "videoaulas" | "bonus">(null);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -184,29 +184,15 @@ export function TopBar() {
             {[
               { icon: mentorIcon, title: "Mentor 24H", sub: "Nosso Agente de IA", action: "mentor" as const },
               { icon: appIcon, title: "App Exclusivo", sub: "Mobile e Desktop", action: "pwa" as const },
-              { icon: planilhasIcon, title: "Planilhas Financeiras", sub: "+ de 6000 Planilhas", action: "soon" as const },
-              { icon: checklistsIcon, title: "Checklists PRO", sub: "Protocolos Exclusivos", action: "soon" as const },
-              { icon: videoaulasIcon, title: "Vídeo Aulas", sub: "Aprenda no seu tempo", action: "soon" as const },
+              { icon: planilhasIcon, title: "Planilhas Financeiras", sub: "+ de 6000 Planilhas", action: "planilhas" as const },
+              { icon: checklistsIcon, title: "Checklists PRO", sub: "Protocolos Exclusivos", action: "checklists" as const },
+              { icon: videoaulasIcon, title: "Vídeo Aulas", sub: "Aprenda no seu tempo", action: "videoaulas" as const },
               { icon: bonusIcon, title: "Bônus Exclusivos", sub: "Brindes Surpresa.", action: "bonus" as const },
             ].map(({ icon, title, sub, action }) => (
               <button
                 type="button"
                 key={title}
-                onClick={() => {
-                  setHighlightsOpen(false);
-                  if (action === "mentor") setMentorOpen(true);
-                  else if (action === "bonus") navigate("/audios");
-                  else if (action === "pwa") {
-                    const ev = (window as any).__d21PWAPrompt;
-                    if (ev && typeof ev.prompt === "function") {
-                      ev.prompt();
-                    } else {
-                      toast.info("Para instalar, use o menu do navegador → 'Adicionar à tela inicial'.");
-                    }
-                  } else {
-                    toast.info(`${title}: Em breve`);
-                  }
-                }}
+                onClick={() => setActiveHighlight(action)}
                 className="flex flex-col items-center gap-1.5 px-2 text-center transition-smooth hover:opacity-80"
               >
                 <img
@@ -226,26 +212,78 @@ export function TopBar() {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={mentorOpen} onOpenChange={setMentorOpen}>
+      <Dialog open={!!activeHighlight} onOpenChange={(o) => !o && setActiveHighlight(null)}>
         <DialogContent className="max-w-sm rounded-3xl">
-          <DialogHeader>
-            <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-              <img src={mentorIcon} alt="" className="h-12 w-12" />
-            </div>
-            <DialogTitle className="text-center">Mentor 24 Horas</DialogTitle>
-          </DialogHeader>
-          <p className="text-center text-sm text-muted-foreground">
-            Converse com o <strong className="text-foreground">Mentor do Progresso</strong> a qualquer hora.
-            Seu conselheiro pessoal de IA está pronto para te ajudar.
-          </p>
-          <a
-            href="https://chatgpt.com/g/g-687434b4fafc81919ae1d9e27d48d27f-o-conselheiro-do-progresso"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 flex h-12 items-center justify-center rounded-2xl gradient-primary font-semibold text-primary-foreground shadow-glow"
-          >
-            Falar com o Mentor do Progresso
-          </a>
+          {(() => {
+            const map: Record<string, { icon: string; title: string; description: ReactNode; cta: string; onCta: () => void; }> = {
+              mentor: {
+                icon: mentorIcon,
+                title: "Mentor 24 Horas",
+                description: <>Converse com o <strong className="text-foreground">Mentor do Progresso</strong> a qualquer hora. Seu conselheiro pessoal de IA está pronto para te ajudar.</>,
+                cta: "Falar com o Mentor do Progresso",
+                onCta: () => window.open("https://chatgpt.com/g/g-687434b4fafc81919ae1d9e27d48d27f-o-conselheiro-do-progresso", "_blank", "noopener,noreferrer"),
+              },
+              pwa: {
+                icon: appIcon,
+                title: "App Exclusivo",
+                description: <>Instale o app na sua tela inicial e acesse a jornada como um app nativo, offline e sem distrações.</>,
+                cta: "Instalar agora",
+                onCta: () => {
+                  const ev = (window as any).__d21PWAPrompt;
+                  if (ev && typeof ev.prompt === "function") ev.prompt();
+                  else toast.info("Use o menu do navegador → 'Adicionar à tela inicial'.");
+                },
+              },
+              planilhas: {
+                icon: planilhasIcon,
+                title: "Planilhas Financeiras",
+                description: <>Mais de <strong className="text-foreground">6000 planilhas</strong> prontas para organizar receitas, despesas, metas e projeções do seu negócio.</>,
+                cta: "Em breve",
+                onCta: () => toast.info("Disponível em breve."),
+              },
+              checklists: {
+                icon: checklistsIcon,
+                title: "Checklists PRO",
+                description: <>Protocolos exclusivos passo a passo para você executar sem travar e evoluir todos os dias.</>,
+                cta: "Em breve",
+                onCta: () => toast.info("Disponível em breve."),
+              },
+              videoaulas: {
+                icon: videoaulasIcon,
+                title: "Vídeo Aulas",
+                description: <>Conteúdos curtos e diretos para você aprender no seu tempo, sem enrolação.</>,
+                cta: "Em breve",
+                onCta: () => toast.info("Disponível em breve."),
+              },
+              bonus: {
+                icon: bonusIcon,
+                title: "Bônus Exclusivos",
+                description: <>Best sellers em áudio com capa, cortina e playlist integrada. Você chegou até aqui — não pare agora.</>,
+                cta: "Acessar Bônus",
+                onCta: () => { setActiveHighlight(null); setHighlightsOpen(false); navigate("/audios"); },
+              },
+            };
+            const item = activeHighlight ? map[activeHighlight] : null;
+            if (!item) return null;
+            return (
+              <>
+                <DialogHeader>
+                  <div className="mx-auto mb-2 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
+                    <img src={item.icon} alt="" className="h-12 w-12" />
+                  </div>
+                  <DialogTitle className="text-center">{item.title}</DialogTitle>
+                </DialogHeader>
+                <p className="text-center text-sm text-muted-foreground">{item.description}</p>
+                <button
+                  type="button"
+                  onClick={item.onCta}
+                  className="mt-2 flex h-12 items-center justify-center rounded-2xl gradient-primary font-semibold text-primary-foreground shadow-glow"
+                >
+                  {item.cta}
+                </button>
+              </>
+            );
+          })()}
         </DialogContent>
       </Dialog>
     </header>
