@@ -464,7 +464,14 @@ function ProductForm({ initial, onSave }: { initial: Product | null; onSave: (p:
           <Input placeholder="Endereço" value={f.supplier?.address || ""} onChange={(e) => setSup("address", e.target.value)} />
         </div>
       </div>
-      <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => f.name && onSave(f)}>Salvar</Button>
+      <Button
+        className="w-full bg-blue-600 hover:bg-blue-700"
+        onClick={() => {
+          if (!f.name.trim()) { toast.error("Informe o nome do produto"); return; }
+          if (!f.price || f.price <= 0) { toast.error("Informe o valor de venda do produto"); return; }
+          onSave({ ...f, name: f.name.trim(), supplier: f.supplier ? { ...f.supplier, name: f.supplier.name.trim() } : f.supplier });
+        }}
+      >Salvar</Button>
     </div>
   );
 }
@@ -583,7 +590,16 @@ function ServiceForm({ initial, onSave }: { initial: Service | null; onSave: (s:
           <Input placeholder="Endereço" value={f.client?.address || ""} onChange={(e) => setCli("address", e.target.value)} />
         </div>
       </div>
-      <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => f.name && onSave(f)}>Salvar</Button>
+      <Button
+        className="w-full bg-blue-600 hover:bg-blue-700"
+        onClick={() => {
+          if (!f.name.trim()) { toast.error("Informe o nome do serviço"); return; }
+          if (!f.amount || f.amount <= 0) { toast.error("Informe o valor do serviço"); return; }
+          if (!f.hireDate) { toast.error("Informe a data de contratação"); return; }
+          if (f.methods.length === 0) { toast.error("Selecione uma forma de recebimento"); return; }
+          onSave({ ...f, name: f.name.trim(), recurrence: f.type === "recorrente" ? (f.recurrence || "mensal") : undefined });
+        }}
+      >Salvar</Button>
     </div>
   );
 }
@@ -717,8 +733,10 @@ function InfoForm({ initial, platforms, onSave }: { initial: Infoproduct | null;
         className="w-full bg-blue-600 hover:bg-blue-700"
         onClick={() => {
           if (!f.name.trim()) { toast.error("Informe o nome do infoproduto"); return; }
-          if (!f.platform) { toast.error("Selecione uma plataforma"); return; }
-          onSave({ ...f, name: f.name.trim() });
+          if (!f.price || f.price <= 0) { toast.error("Informe o preço do infoproduto"); return; }
+          if (!f.commission || f.commission <= 0) { toast.error("Informe a comissão do infoproduto"); return; }
+          if (!f.platform.trim()) { toast.error("Selecione uma plataforma"); return; }
+          onSave({ ...f, name: f.name.trim(), platform: f.platform.trim() });
         }}
       >Salvar</Button>
     </div>
