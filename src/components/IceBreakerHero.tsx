@@ -95,7 +95,12 @@ export function IceBreakerHero() {
           <div className="flex items-center gap-3 pr-10">
             <MentorAvatar playing={!!activeId} compact />
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-extrabold leading-tight">Mentor do Progresso</p>
+              <p className="flex items-center gap-2 truncate text-sm font-extrabold leading-tight">
+                <span className="truncate">Mentor do Progresso</span>
+                <span className="shrink-0 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-300 shadow-[0_0_10px_hsl(45_95%_60%/0.35)]">
+                  Comece Aqui!
+                </span>
+              </p>
               <div className="mt-1 flex items-center gap-1.5">
                 <span className="text-[10px] font-bold uppercase tracking-wider text-white/60">
                   Status:
