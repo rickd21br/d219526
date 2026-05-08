@@ -66,6 +66,7 @@ function BonusAudioCard({
   speed,
   onSpeedChange,
   onSaveProgress,
+  onSeek,
 }: {
   item: InspirationAudio;
   playingId: string | null;
@@ -80,6 +81,7 @@ function BonusAudioCard({
   speed: number;
   onSpeedChange: (s: number) => void;
   onSaveProgress: () => void;
+  onSeek: (sec: number) => void;
 }) {
   const [open, setOpen] = useState(false);
   const isList = variant === "list";
@@ -181,10 +183,7 @@ function BonusAudioCard({
                               max={duration || 0}
                               step={0.1}
                               value={Math.min(currentTime, duration || 0)}
-                              onChange={(e) => {
-                                e.stopPropagation();
-                                if ((window as any).__bonusAudio) (window as any).__bonusAudio.currentTime = Number(e.target.value);
-                              }}
+                              onChange={(e) => { e.stopPropagation(); onSeek(Number(e.target.value)); }}
                               onClick={(e) => e.stopPropagation()}
                               aria-label="Posição"
                               className="audio-range-mini mt-1 w-full"
