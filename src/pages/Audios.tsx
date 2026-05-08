@@ -571,6 +571,7 @@ const Audios = () => {
             speed={speed}
             onSpeedChange={setSpeed}
             onSaveProgress={handleSaveProgress}
+            onSeek={(sec) => { if (audioRef.current) audioRef.current.currentTime = sec; }}
           />
         ))}
       </section>
