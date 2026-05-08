@@ -406,6 +406,7 @@ const MeuNegocio = () => {
             </DialogContent>
           </Dialog>
 
+          <NewSaleDialog open={saleOpen} onOpenChange={setSaleOpen} />
           <section>
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-bold uppercase text-muted-foreground">Seus negócios</p>
