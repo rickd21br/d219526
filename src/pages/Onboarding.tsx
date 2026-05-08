@@ -36,7 +36,7 @@ import appleLogo from "@/assets/apple-logo.png";
 
 const BG_URL = "https://jornadadoprogresso.com/wp-content/uploads/2026/04/onboarding-bg.png";
 const TUTORIAL_SEEN_KEY = "d21.tutorialSeen";
-const APP_VERSION = "6.5.26BR";
+const APP_VERSION = "8.5.26Br";
 const SHOWCASE_AUDIO = "/sounds/transicao-botoes-login.mp3";
 const SHOWCASE_LABELS = ["Ajuda", "Atualizações", "Instalar app"] as const;
 
