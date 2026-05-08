@@ -93,7 +93,6 @@ export function IceBreakerHero() {
         {/* Header */}
         <div className="flex items-start justify-between gap-3 pr-10">
           <div className="min-w-0 flex-1">
-          <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[hsl(var(--primary-glow))] shadow-[0_0_10px_hsl(var(--primary-glow))]" />
               <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--primary-glow))]">
