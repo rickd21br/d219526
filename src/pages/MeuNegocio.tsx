@@ -18,6 +18,8 @@ import {
   MoreVertical,
   Eye,
   ArrowUp,
+  HelpCircle,
+  TrendingUp,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -204,6 +206,7 @@ const MeuNegocio = () => {
   const [products, setProducts] = useStorage<Product[]>("d21.mn.products", []);
   const [services, setServices] = useStorage<Service[]>("d21.mn.services", []);
   const [infos, setInfos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
+  const [sales] = useStorage<Sale[]>("d21.mn.sales", []);
   const [extraPlatforms] = useStorage<string[]>("d21.mn.platforms", []);
   const platforms = [...FIXED_PLATFORMS, ...extraPlatforms];
 
@@ -332,30 +335,46 @@ const MeuNegocio = () => {
             <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">
               Meus ativos por categoria
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-3 px-1">
               <CatCard
-                icon={<Package />}
-                color="emerald"
+                icon={<Package className="h-5 w-5" />}
+                color="amber"
                 label="Produtos"
                 count={products.length}
+                countLabel="ativos cadastrados"
+                addLabel="Adicionar Produto"
                 onOpen={() => setCat("produtos")}
                 onAdd={() => setAddOpen("produtos")}
               />
               <CatCard
-                icon={<Wrench />}
+                icon={<Wrench className="h-5 w-5" />}
                 color="blue"
                 label="Serviços"
                 count={services.length}
+                countLabel="ativos cadastrados"
+                addLabel="Adicionar Serviço"
                 onOpen={() => setCat("servicos")}
                 onAdd={() => setAddOpen("servicos")}
               />
               <CatCard
-                icon={<GraduationCap />}
+                icon={<GraduationCap className="h-5 w-5" />}
                 color="violet"
                 label="Infoprodutos"
                 count={infos.length}
+                countLabel="ativos cadastrados"
+                addLabel="Adicionar Infoproduto"
                 onOpen={() => setCat("info")}
                 onAdd={() => setAddOpen("info")}
+              />
+              <CatCard
+                icon={<TrendingUp className="h-5 w-5" />}
+                color="sales"
+                label="Vendas"
+                count={sales.filter((s) => s.status === "Pago").length}
+                countLabel="vendas realizadas"
+                addLabel="Adicionar Venda"
+                onOpen={() => toast.info("Listagem de vendas: em breve")}
+                onAdd={() => toast.info("Formulário de Nova Venda: em breve")}
               />
             </div>
           </section>
@@ -526,6 +545,16 @@ const CAT_COLORS: Record<string, string> = {
   emerald: "bg-emerald-500/15 text-emerald-600",
   blue: "bg-blue-500/15 text-blue-600",
   violet: "bg-violet-500/15 text-violet-600",
+  amber: "bg-amber-500/15 text-amber-600",
+  sales: "bg-emerald-500/15 text-emerald-600",
+};
+
+const COUNT_COLOR: Record<string, string> = {
+  amber: "text-amber-500",
+  blue: "text-blue-600",
+  violet: "text-violet-600",
+  sales: "text-emerald-600",
+  emerald: "text-emerald-600",
 };
 
 function BackToTop() {
@@ -553,45 +582,112 @@ function CatCard({
   color,
   label,
   count,
+  countLabel,
+  addLabel,
   onOpen,
   onAdd,
+  onEdit,
+  onDelete,
 }: {
   icon: React.ReactNode;
   color: string;
   label: string;
   count: number;
+  countLabel: string;
+  addLabel: string;
   onOpen: () => void;
   onAdd: () => void;
+  onEdit?: () => void;
+  onDelete?: () => void;
 }) {
+  const iconBtn =
+    "flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20";
   return (
-    <div className="relative flex flex-col items-center gap-1 rounded-2xl border border-border bg-card p-3 text-center shadow-soft">
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          toast.info(`Áudio-tutorial de ${label}: em breve`);
-        }}
-        aria-label={`Áudio-tutorial ${label}`}
-        className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-600 hover:bg-emerald-500/25"
-      >
-        <Volume2 className="h-3 w-3" />
-      </button>
-      <div
-        className={cn("flex h-10 w-10 items-center justify-center rounded-xl", CAT_COLORS[color])}
-      >
-        {icon}
+    <div className="relative flex flex-col rounded-2xl border border-border bg-card p-3 shadow-soft">
+      {/* Topo: ícone + ações */}
+      <div className="flex items-start justify-between gap-1.5">
+        <div
+          className={cn(
+            "flex h-10 w-10 items-center justify-center rounded-xl shrink-0",
+            CAT_COLORS[color],
+          )}
+        >
+          {icon}
+        </div>
+        <div className="flex items-center gap-1">
+          <button
+            type="button"
+            aria-label={`Áudio de ${label}`}
+            onClick={() => toast.info(`Áudio-tutorial de ${label}: em breve`)}
+            className={iconBtn}
+          >
+            <Volume2 className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            aria-label={`Ajuda ${label}`}
+            onClick={() => toast.info(`Ajuda sobre ${label}: em breve`)}
+            className={iconBtn}
+          >
+            <HelpCircle className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            aria-label={`Ver todos ${label}`}
+            onClick={onOpen}
+            className={iconBtn}
+          >
+            <Eye className="h-3.5 w-3.5" />
+          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                type="button"
+                aria-label={`Menu ${label}`}
+                className="flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
+              >
+                <MoreVertical className="h-4 w-4" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={onAdd}>Adicionar</DropdownMenuItem>
+              {onEdit && <DropdownMenuItem onClick={onEdit}>Editar</DropdownMenuItem>}
+              {onDelete && (
+                <DropdownMenuItem onClick={onDelete} className="text-red-600">
+                  Excluir
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={onOpen}>Ver todos os lançamentos</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-      <p className="text-xl font-extrabold">{count}</p>
-      <p className="text-[10px] uppercase text-muted-foreground">{label}</p>
-      <button onClick={onOpen} className="text-[10px] font-semibold text-blue-600 hover:underline">
-        Ver todos ›
-      </button>
-      <button
-        onClick={onAdd}
-        className="mt-1 w-full rounded-lg bg-blue-600/10 py-1 text-[10px] font-bold text-blue-600 hover:bg-blue-600/20"
-      >
-        + Adicionar
-      </button>
+
+      {/* Centro: título + contador + descrição */}
+      <p className="mt-2 text-sm font-extrabold">{label}</p>
+      <div className="mt-3 flex flex-col items-center">
+        <p className={cn("text-3xl font-extrabold leading-none", COUNT_COLOR[color])}>{count}</p>
+        <p className="mt-1.5 text-[11px] text-muted-foreground">{countLabel}</p>
+      </div>
+
+      {/* Rodapé: botão adicionar */}
+      <div className="mt-4 flex items-center gap-2 border-t border-border/60 pt-3">
+        <button
+          type="button"
+          onClick={onAdd}
+          aria-label={addLabel}
+          className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white hover:bg-emerald-600"
+        >
+          <Plus className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={onAdd}
+          className="text-[11px] font-bold text-emerald-600 hover:underline"
+        >
+          {addLabel}
+        </button>
+      </div>
     </div>
   );
 }
