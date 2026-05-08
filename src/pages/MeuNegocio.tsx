@@ -713,7 +713,14 @@ function InfoForm({ initial, platforms, onSave }: { initial: Infoproduct | null;
         </Select>
       </div>
       <div><Label>Descrição</Label><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
-      <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => f.name && onSave(f)}>Salvar</Button>
+      <Button
+        className="w-full bg-blue-600 hover:bg-blue-700"
+        onClick={() => {
+          if (!f.name.trim()) { toast.error("Informe o nome do infoproduto"); return; }
+          if (!f.platform) { toast.error("Selecione uma plataforma"); return; }
+          onSave({ ...f, name: f.name.trim() });
+        }}
+      >Salvar</Button>
     </div>
   );
 }
@@ -879,7 +886,15 @@ function SaleForm({ initial, products, onSave }: { initial: Sale | null; product
         <label className="flex items-center gap-1"><input type="checkbox" checked={!!f.refund} onChange={(e) => set("refund", e.target.checked)} />Reembolso</label>
         <label className="flex items-center gap-1"><input type="checkbox" checked={!!f.chargeback} onChange={(e) => set("chargeback", e.target.checked)} />Chargeback</label>
       </div>
-      <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => f.customer && onSave(f)}>Salvar</Button>
+      <Button
+        className="w-full bg-blue-600 hover:bg-blue-700"
+        onClick={() => {
+          if (!f.customer.trim()) { toast.error("Informe o nome do cliente"); return; }
+          if (!f.productId) { toast.error("Selecione um infoproduto"); return; }
+          if (!f.amount || f.amount <= 0) { toast.error("Informe o valor da venda"); return; }
+          onSave({ ...f, customer: f.customer.trim() });
+        }}
+      >Salvar</Button>
     </div>
   );
 }
