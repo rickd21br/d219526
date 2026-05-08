@@ -713,7 +713,14 @@ function InfoForm({ initial, platforms, onSave }: { initial: Infoproduct | null;
         </Select>
       </div>
       <div><Label>Descrição</Label><Textarea value={f.description} onChange={(e) => set("description", e.target.value)} /></div>
-      <Button className="w-full bg-blue-600 hover:bg-blue-700" onClick={() => f.name && onSave(f)}>Salvar</Button>
+      <Button
+        className="w-full bg-blue-600 hover:bg-blue-700"
+        onClick={() => {
+          if (!f.name.trim()) { toast.error("Informe o nome do infoproduto"); return; }
+          if (!f.platform) { toast.error("Selecione uma plataforma"); return; }
+          onSave({ ...f, name: f.name.trim() });
+        }}
+      >Salvar</Button>
     </div>
   );
 }
