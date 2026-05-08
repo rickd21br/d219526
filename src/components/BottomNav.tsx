@@ -52,9 +52,9 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
 export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-xl safe-bottom">
-      <div className="relative mx-auto grid h-16 w-full max-w-md grid-cols-5 items-stretch px-1">
+      <div className="relative mx-auto grid h-16 w-full max-w-md grid-cols-5 items-center px-1 py-1">
         {leftTabs.map((t) => (
-          <div key={t.to} className="flex items-stretch justify-center">
+          <div key={t.to} className="flex h-full items-center justify-center">
             <TabLink {...t} />
           </div>
         ))}
