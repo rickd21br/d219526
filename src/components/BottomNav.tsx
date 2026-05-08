@@ -61,24 +61,26 @@ export function BottomNav() {
 
         {/* Center floating action button + label */}
         <div className="flex h-full flex-col items-center justify-center">
-          <AddTransactionDialog
-            trigger={
-              <button
-                type="button"
-                aria-label="Novo Lançamento"
-                style={{
-                  backgroundColor: "hsl(var(--primary))",
-                  boxShadow: "0px 8px 20px rgba(0,0,0,0.18)",
-                }}
-                className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground transition-smooth hover:opacity-90 active:scale-95"
-              >
-                <Plus className="h-6 w-6 text-white" strokeWidth={2.75} />
-              </button>
-            }
-          />
-          <span className="mt-1 block w-full truncate text-center text-[10px] font-semibold leading-none text-primary">
-            Novo
-          </span>
+          <div className="flex flex-col items-center">
+            <AddTransactionDialog
+              trigger={
+                <button
+                  type="button"
+                  aria-label="Novo Lançamento"
+                  style={{
+                    backgroundColor: "hsl(var(--primary))",
+                    boxShadow: "0px 8px 20px rgba(0,0,0,0.18)",
+                  }}
+                  className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground transition-smooth hover:opacity-90 active:scale-95"
+                >
+                  <Plus className="h-6 w-6 text-white" strokeWidth={2.75} />
+                </button>
+              }
+            />
+            <span className="mt-1 text-[10px] font-semibold leading-none text-primary">
+              Novo
+            </span>
+          </div>
         </div>
 
         {rightTabs.map((t) => (
