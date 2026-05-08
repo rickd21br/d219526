@@ -37,7 +37,7 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
           />
           <span
             className={cn(
-              "block w-full truncate text-center text-[10px] leading-none",
+              "text-center text-[10px] leading-none",
               isActive && "font-semibold text-primary"
             )}
           >
