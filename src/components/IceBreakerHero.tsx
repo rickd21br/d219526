@@ -62,7 +62,7 @@ export function IceBreakerHero() {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-[28px]",
+        "relative overflow-hidden rounded-2xl",
         "bg-[hsl(165_38%_9%)] text-[hsl(150_20%_96%)]",
         "ring-1 ring-[hsl(var(--primary-glow)/0.55)]",
         neuOut,
@@ -76,13 +76,13 @@ export function IceBreakerHero() {
       </div>
 
       <div className="relative p-5">
-        {/* Botão recolher — canto superior direito do container */}
+        {/* Botão recolher */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Recolher" : "Expandir"}
           aria-expanded={open}
-          className="absolute right-3 top-3 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-[hsl(165_40%_7%)] text-[hsl(var(--primary-glow))] shadow-[inset_3px_3px_8px_hsl(165_50%_3%/0.8),_inset_-2px_-2px_6px_hsl(165_30%_14%/0.45)] transition-smooth active:scale-95"
+          className="absolute right-5 top-5 z-30 flex h-7 w-7 items-center justify-center rounded-full bg-[hsl(165_40%_7%)] text-[hsl(var(--primary-glow))] shadow-[inset_3px_3px_8px_hsl(165_50%_3%/0.8),_inset_-2px_-2px_6px_hsl(165_30%_14%/0.45)] transition-smooth active:scale-95"
         >
           <ChevronDown
             className={cn("h-4 w-4 transition-transform duration-300", open && "rotate-180")}
@@ -90,57 +90,74 @@ export function IceBreakerHero() {
           />
         </button>
 
-        {/* Header */}
-        <div className="flex items-start justify-between gap-3 pr-10">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5">
-              <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[hsl(var(--primary-glow))] shadow-[0_0_10px_hsl(var(--primary-glow))]" />
-              <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--primary-glow))]">
-                Mentor do Progresso · Online
-              </span>
+        {/* Header — compacto quando recolhido */}
+        {!open ? (
+          <div className="flex items-center gap-3 pr-10">
+            <MentorAvatar playing={!!activeId} compact />
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-extrabold leading-tight">Mentor do Progresso</p>
+              <div className="mt-1 flex items-center gap-1.5">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-white/60">
+                  Status:
+                </span>
+                <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[hsl(var(--primary-glow))] shadow-[0_0_8px_hsl(var(--primary-glow))]" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[hsl(var(--primary-glow))]">
+                  Online
+                </span>
+              </div>
             </div>
-            <h2 className="mt-1.5 flex items-center gap-2 text-2xl font-extrabold leading-none tracking-tight">
-              <Sparkles className="h-5 w-5 text-[hsl(var(--primary-glow))]" />
-              Comece Aqui
-            </h2>
+          </div>
+        ) : (
+          <div className="flex items-start justify-between gap-3 pr-10">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="inline-flex h-1.5 w-1.5 animate-pulse rounded-full bg-[hsl(var(--primary-glow))] shadow-[0_0_10px_hsl(var(--primary-glow))]" />
+                <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[hsl(var(--primary-glow))]">
+                  Mentor do Progresso · Online
+                </span>
+              </div>
+              <h2 className="mt-1.5 flex items-center gap-2 text-2xl font-extrabold leading-none tracking-tight">
+                <Sparkles className="h-5 w-5 text-[hsl(var(--primary-glow))]" />
+                Comece Aqui
+              </h2>
 
-            {/* Linha única: Quebra-Gelo + estrelas + collapse */}
-            <div className="mt-2 flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[hsl(150_20%_82%)]">
-                Quebra-Gelo
-              </span>
-              <div
-                className={cn(
-                  "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5",
-                  "bg-[hsl(165_40%_7%)]",
-                  neuIn,
-                )}
-                aria-label={`${starsFilled} de 5 estrelas`}
-              >
-                {Array.from({ length: 5 }).map((_, i) => {
-                  const on = i < starsFilled;
-                  return (
-                    <Star
-                      key={i}
-                      className={cn(
-                        "h-3 w-3 transition",
-                        on
-                          ? "fill-[hsl(45_95%_58%)] text-[hsl(45_95%_58%)] drop-shadow-[0_0_4px_hsl(45_95%_58%/0.8)]"
-                          : "text-white/20",
-                      )}
-                    />
-                  );
-                })}
+              {/* Linha única: Quebra-Gelo + estrelas + X/10 */}
+              <div className="mt-2 flex flex-wrap items-center gap-2">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[hsl(150_20%_82%)]">
+                  Quebra-Gelo
+                </span>
+                <div
+                  className={cn(
+                    "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5",
+                    "bg-[hsl(165_40%_7%)]",
+                    neuIn,
+                  )}
+                  aria-label={`${starsFilled} de 5 estrelas`}
+                >
+                  {Array.from({ length: 5 }).map((_, i) => {
+                    const on = i < starsFilled;
+                    return (
+                      <Star
+                        key={i}
+                        className={cn(
+                          "h-3 w-3 transition",
+                          on
+                            ? "fill-[hsl(45_95%_58%)] text-[hsl(45_95%_58%)] drop-shadow-[0_0_4px_hsl(45_95%_58%/0.8)]"
+                            : "text-white/20",
+                        )}
+                      />
+                    );
+                  })}
+                </div>
+                <span className="text-[11px] font-medium text-white/60">
+                  {completedCount}/{total} conselhos
+                </span>
               </div>
             </div>
 
-            <p className="mt-2 text-[11px] font-medium text-white/60">
-              {completedCount}/{total} conselhos
-            </p>
+            <MentorAvatar playing={!!activeId} />
           </div>
-
-          <MentorAvatar playing={!!activeId} />
-        </div>
+        )}
 
         {/* Lista sequencial */}
         <div
@@ -229,22 +246,7 @@ export function IceBreakerHero() {
         </DialogContent>
       </Dialog>
 
-      {/* Troféu Gold */}
-      {trophyFor && (
-        <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" />
-          <div className="relative flex flex-col items-center gap-3 animate-scale-in">
-            <img
-              src={trofeuGold}
-              alt="Troféu de conclusão"
-              className="h-32 w-32 drop-shadow-[0_0_30px_hsl(45_95%_58%/0.8)]"
-            />
-            <p className="rounded-full bg-[hsl(45_95%_58%)] px-4 py-1.5 text-sm font-black text-[hsl(165_40%_8%)] shadow-[0_0_20px_hsl(45_95%_58%/0.7)]">
-              +15 XP · Conselho concluído!
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Troféu Gold (apenas no item da lista; aqui só dispara o som) */}
     </section>
   );
 }
@@ -286,6 +288,7 @@ function AudioListItem({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [speedIdx, setSpeedIdx] = useState(0);
+  const [xpBurst, setXpBurst] = useState(false);
   const userPausedRef = useRef(false);
 
   const speed = SPEEDS[speedIdx];
@@ -350,6 +353,8 @@ function AudioListItem({
   const onEnded = () => {
     setPlaying(false);
     onDeactivate();
+    setXpBurst(true);
+    window.setTimeout(() => setXpBurst(false), 1800);
     onComplete();
   };
 
@@ -400,7 +405,14 @@ function AudioListItem({
 
         {/* Texto */}
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold leading-tight">{audio.title}</p>
+          <p className="flex items-center gap-2 truncate text-sm font-bold leading-tight">
+            <span className="truncate">{audio.title}</span>
+            {xpBurst && (
+              <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-[hsl(45_95%_58%)] px-2 py-0.5 text-[10px] font-black text-[hsl(165_40%_8%)] shadow-[0_0_12px_hsl(45_95%_58%/0.7)] animate-scale-in">
+                +15 XP
+              </span>
+            )}
+          </p>
           <p className="truncate text-[11px] text-white/55">
             {audio.duration} · {audio.subtitle}
           </p>
@@ -465,9 +477,11 @@ function AudioListItem({
 
 /* ---------- Sub-componentes ---------- */
 
-function MentorAvatar({ playing }: { playing: boolean }) {
+function MentorAvatar({ playing, compact = false }: { playing: boolean; compact?: boolean }) {
+  const size = compact ? "h-12 w-12" : "h-16 w-16";
+  const inner = compact ? "h-10 w-10" : "h-14 w-14";
   return (
-    <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+    <div className={cn("relative flex shrink-0 items-center justify-center", size)}>
       <div
         className={cn(
           "absolute inset-0 rounded-full bg-[hsl(var(--primary-glow)/0.35)] blur-md",
@@ -480,9 +494,11 @@ function MentorAvatar({ playing }: { playing: boolean }) {
         src={MENTOR_IMG}
         alt="Mentor do Progresso"
         loading="lazy"
-        className="relative h-14 w-14 rounded-full object-cover"
+        className={cn("relative rounded-full object-cover", inner)}
       />
-      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-[hsl(var(--primary-glow))] ring-2 ring-[hsl(165_38%_9%)] shadow-[0_0_8px_hsl(var(--primary-glow))]" />
+      {!compact && (
+        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-[hsl(var(--primary-glow))] ring-2 ring-[hsl(165_38%_9%)] shadow-[0_0_8px_hsl(var(--primary-glow))]" />
+      )}
     </div>
   );
 }
