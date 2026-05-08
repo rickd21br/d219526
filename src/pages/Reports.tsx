@@ -14,6 +14,7 @@ import { JOURNEY_DAYS } from "@/data/journey";
 type BizProduct = { id: string; name: string; cost: number; price: number };
 type BizService = { id: string; name: string; amount: number };
 type BizInfo = { id: string; name: string; price: number; commissionType: "percent" | "fixed"; commission: number; platform: string };
+type BizSale = { id: string; productId: string; customer: string; status: string; amount: number; date: string };
 
 const COLORS = [
   "hsl(162 73% 38%)",
@@ -38,17 +39,22 @@ const Reports = () => {
   const [bizProducts] = useStorage<BizProduct[]>("d21.mn.products", []);
   const [bizServices] = useStorage<BizService[]>("d21.mn.services", []);
   const [bizInfos] = useStorage<BizInfo[]>("d21.mn.infoproducts", []);
+  const [bizSales] = useStorage<BizSale[]>("d21.mn.sales", []);
   const [incorporate, setIncorporate] = useStorage<boolean>("d21.mn.incorporate", false);
 
   const bizSummary = useMemo(() => {
     const prodReceita = bizProducts.reduce((s, p) => s + p.price, 0);
     const servReceita = bizServices.reduce((s, p) => s + p.amount, 0);
-    const infoReceita = bizInfos.reduce((s, p) => s + (p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission), 0);
+    const infoReceitaPotencial = bizInfos.reduce((s, p) => s + (p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission), 0);
+    const infoVendasPagas = bizSales.filter((s) => s.status === "Pago" && !Number.isNaN(s.amount));
+    const infoReceitaRealizada = infoVendasPagas.reduce((s, sale) => s + sale.amount, 0);
+    const infoReceita = infoReceitaRealizada || infoReceitaPotencial;
     const margens = bizProducts.filter((p) => p.cost > 0).map((p) => ((p.price - p.cost) / p.cost) * 100);
     const margemMedia = margens.length ? margens.reduce((a, b) => a + b, 0) / margens.length : 0;
     return {
       total: bizProducts.length + bizServices.length + bizInfos.length,
       receita: prodReceita + servReceita + infoReceita,
+      vendasInfo: infoVendasPagas.length,
       margemMedia,
       byCat: [
         { name: "Produtos", value: prodReceita, count: bizProducts.length },
@@ -56,7 +62,7 @@ const Reports = () => {
         { name: "Infoprodutos", value: infoReceita, count: bizInfos.length },
       ],
     };
-  }, [bizProducts, bizServices, bizInfos]);
+  }, [bizProducts, bizServices, bizInfos, bizSales]);
 
   const displayTotals = useMemo(() => {
     if (!incorporate) return totals;
