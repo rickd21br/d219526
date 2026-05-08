@@ -384,6 +384,7 @@ const Audios = () => {
   const [resumePrompt, setResumePrompt] = useState<{ track: PlayerTrack; saved: number } | null>(null);
   const [trophyBook, setTrophyBook] = useState<InspirationAudio | null>(null);
   const completedRef = useRef(false);
+  const [playerCollapsed, setPlayerCollapsed] = useStorage<boolean>("d21.bonusPlayerCollapsed", false);
 
   const [view, setView] = useStorage<"grid" | "list">("d21.bonusView", "list");
 
@@ -529,6 +530,8 @@ const Audios = () => {
           if (next) selectInspirationTrack(book, next);
         }}
         onSave={handleSaveProgress}
+        collapsed={playerCollapsed}
+        onToggleCollapsed={() => setPlayerCollapsed(!playerCollapsed)}
       />
 
       <section className="mb-3 flex items-center justify-end gap-2">
