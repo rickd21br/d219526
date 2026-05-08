@@ -3,17 +3,51 @@ import { useTransactions, useJourney, formatCurrency } from "@/hooks/useFinance"
 import { useStorage } from "@/hooks/useStorage";
 import { Switch } from "@/components/ui/switch";
 import {
-  PieChart, Pie, Cell, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend,
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  Legend,
 } from "recharts";
 import { useMemo } from "react";
 import { format, parseISO } from "date-fns";
-import { ArrowDownCircle, ArrowUpCircle, TrendingUp, Trophy, Sparkles, Package, Wrench, GraduationCap, Briefcase } from "lucide-react";
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  TrendingUp,
+  Trophy,
+  Sparkles,
+  Package,
+  Wrench,
+  GraduationCap,
+  Briefcase,
+} from "lucide-react";
 import { JOURNEY_DAYS } from "@/data/journey";
 
 type BizProduct = { id: string; name: string; cost: number; price: number };
 type BizService = { id: string; name: string; amount: number };
-type BizInfo = { id: string; name: string; price: number; commissionType: "percent" | "fixed"; commission: number; platform: string };
+type BizInfo = {
+  id: string;
+  name: string;
+  price: number;
+  commissionType: "percent" | "fixed";
+  commission: number;
+  platform: string;
+};
+type BizSale = {
+  id: string;
+  productId: string;
+  customer: string;
+  status: string;
+  amount: number;
+  date: string;
+};
 
 const COLORS = [
   "hsl(162 73% 38%)",
@@ -29,7 +63,7 @@ const COLORS = [
 
 // Cores semânticas para psicologia financeira
 const COLOR_INCOME = "hsl(152 70% 42%)"; // verde — abundância, entrada
-const COLOR_EXPENSE = "hsl(0 75% 58%)";  // vermelho — alerta, saída
+const COLOR_EXPENSE = "hsl(0 75% 58%)"; // vermelho — alerta, saída
 const COLOR_BALANCE = "hsl(217 91% 55%)"; // azul — confiança, saldo
 
 const Reports = () => {
@@ -38,17 +72,28 @@ const Reports = () => {
   const [bizProducts] = useStorage<BizProduct[]>("d21.mn.products", []);
   const [bizServices] = useStorage<BizService[]>("d21.mn.services", []);
   const [bizInfos] = useStorage<BizInfo[]>("d21.mn.infoproducts", []);
+  const [bizSales] = useStorage<BizSale[]>("d21.mn.sales", []);
   const [incorporate, setIncorporate] = useStorage<boolean>("d21.mn.incorporate", false);
 
   const bizSummary = useMemo(() => {
     const prodReceita = bizProducts.reduce((s, p) => s + p.price, 0);
     const servReceita = bizServices.reduce((s, p) => s + p.amount, 0);
-    const infoReceita = bizInfos.reduce((s, p) => s + (p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission), 0);
-    const margens = bizProducts.filter((p) => p.cost > 0).map((p) => ((p.price - p.cost) / p.cost) * 100);
+    const infoReceitaPotencial = bizInfos.reduce(
+      (s, p) =>
+        s + (p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission),
+      0,
+    );
+    const infoVendasPagas = bizSales.filter((s) => s.status === "Pago" && !Number.isNaN(s.amount));
+    const infoReceitaRealizada = infoVendasPagas.reduce((s, sale) => s + sale.amount, 0);
+    const infoReceita = infoReceitaRealizada || infoReceitaPotencial;
+    const margens = bizProducts
+      .filter((p) => p.cost > 0)
+      .map((p) => ((p.price - p.cost) / p.cost) * 100);
     const margemMedia = margens.length ? margens.reduce((a, b) => a + b, 0) / margens.length : 0;
     return {
       total: bizProducts.length + bizServices.length + bizInfos.length,
       receita: prodReceita + servReceita + infoReceita,
+      vendasInfo: infoVendasPagas.length,
       margemMedia,
       byCat: [
         { name: "Produtos", value: prodReceita, count: bizProducts.length },
@@ -56,19 +101,25 @@ const Reports = () => {
         { name: "Infoprodutos", value: infoReceita, count: bizInfos.length },
       ],
     };
-  }, [bizProducts, bizServices, bizInfos]);
+  }, [bizProducts, bizServices, bizInfos, bizSales]);
 
   const displayTotals = useMemo(() => {
     if (!incorporate) return totals;
     const extra = bizSummary.receita;
-    return { income: totals.income + extra, expense: totals.expense, balance: totals.balance + extra };
+    return {
+      income: totals.income + extra,
+      expense: totals.expense,
+      balance: totals.balance + extra,
+    };
   }, [incorporate, totals, bizSummary.receita]);
 
   const byCategory = useMemo(() => {
     const map = new Map<string, number>();
-    transactions.filter((t) => t.type === "expense").forEach((t) => {
-      map.set(t.category, (map.get(t.category) ?? 0) + t.amount);
-    });
+    transactions
+      .filter((t) => t.type === "expense")
+      .forEach((t) => {
+        map.set(t.category, (map.get(t.category) ?? 0) + t.amount);
+      });
     return Array.from(map.entries())
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value);
@@ -146,16 +197,29 @@ const Reports = () => {
       <div className="rounded-xl border bg-popover/90 backdrop-blur-md px-3 py-2 text-xs shadow-lg">
         <div className="mb-1.5 font-semibold text-foreground">{label}</div>
         <div className="flex justify-between gap-4">
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: COLOR_INCOME }} />Entradas:</span>
-          <span className="font-semibold" style={{ color: COLOR_INCOME }}>{formatCurrency(inc)}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: COLOR_INCOME }} />
+            Entradas:
+          </span>
+          <span className="font-semibold" style={{ color: COLOR_INCOME }}>
+            {formatCurrency(inc)}
+          </span>
         </div>
         <div className="flex justify-between gap-4">
-          <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full" style={{ background: COLOR_EXPENSE }} />Saídas:</span>
-          <span className="font-semibold" style={{ color: COLOR_EXPENSE }}>{formatCurrency(exp)}</span>
+          <span className="flex items-center gap-1.5">
+            <span className="h-2 w-2 rounded-full" style={{ background: COLOR_EXPENSE }} />
+            Saídas:
+          </span>
+          <span className="font-semibold" style={{ color: COLOR_EXPENSE }}>
+            {formatCurrency(exp)}
+          </span>
         </div>
         <div className="mt-1 flex justify-between gap-4 border-t pt-1">
           <span className="text-muted-foreground">Saldo:</span>
-          <span className="font-semibold" style={{ color: bal >= 0 ? COLOR_INCOME : COLOR_EXPENSE }}>
+          <span
+            className="font-semibold"
+            style={{ color: bal >= 0 ? COLOR_INCOME : COLOR_EXPENSE }}
+          >
             {formatCurrency(bal)}
           </span>
         </div>
@@ -174,9 +238,15 @@ const Reports = () => {
       <section className="mb-5 grid grid-cols-3 gap-2">
         <div
           className="rounded-2xl p-3 shadow-soft"
-          style={{ background: `linear-gradient(135deg, ${COLOR_INCOME}22, ${COLOR_INCOME}08)`, border: `1px solid ${COLOR_INCOME}33` }}
+          style={{
+            background: `linear-gradient(135deg, ${COLOR_INCOME}22, ${COLOR_INCOME}08)`,
+            border: `1px solid ${COLOR_INCOME}33`,
+          }}
         >
-          <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide" style={{ color: COLOR_INCOME }}>
+          <div
+            className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide"
+            style={{ color: COLOR_INCOME }}
+          >
             <ArrowUpCircle className="h-3 w-3" /> Entradas
           </div>
           <div className="mt-1 text-sm font-bold" style={{ color: COLOR_INCOME }}>
@@ -185,9 +255,15 @@ const Reports = () => {
         </div>
         <div
           className="rounded-2xl p-3 shadow-soft"
-          style={{ background: `linear-gradient(135deg, ${COLOR_EXPENSE}22, ${COLOR_EXPENSE}08)`, border: `1px solid ${COLOR_EXPENSE}33` }}
+          style={{
+            background: `linear-gradient(135deg, ${COLOR_EXPENSE}22, ${COLOR_EXPENSE}08)`,
+            border: `1px solid ${COLOR_EXPENSE}33`,
+          }}
         >
-          <div className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide" style={{ color: COLOR_EXPENSE }}>
+          <div
+            className="flex items-center gap-1 text-[10px] font-medium uppercase tracking-wide"
+            style={{ color: COLOR_EXPENSE }}
+          >
             <ArrowDownCircle className="h-3 w-3" /> Saídas
           </div>
           <div className="mt-1 text-sm font-bold" style={{ color: COLOR_EXPENSE }}>
@@ -263,13 +339,24 @@ const Reports = () => {
       <section className="rounded-3xl bg-card p-5 shadow-soft">
         <h2 className="mb-3 text-base font-semibold">Gastos por categoria</h2>
         {byCategory.length === 0 ? (
-          <p className="py-10 text-center text-sm text-muted-foreground">Sem dados de gastos ainda.</p>
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            Sem dados de gastos ainda.
+          </p>
         ) : (
           <>
             <div className="h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={byCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} innerRadius={45} paddingAngle={2}>
+                  <Pie
+                    data={byCategory}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    innerRadius={45}
+                    paddingAngle={2}
+                  >
                     {byCategory.map((_, i) => (
                       <Cell key={i} fill={COLORS[i % COLORS.length]} />
                     ))}
@@ -282,7 +369,10 @@ const Reports = () => {
               {byCategory.map((c, i) => (
                 <li key={c.name} className="flex items-center justify-between text-sm">
                   <span className="flex items-center gap-2">
-                    <span className="h-3 w-3 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
+                    <span
+                      className="h-3 w-3 rounded-full"
+                      style={{ background: COLORS[i % COLORS.length] }}
+                    />
                     {c.name}
                   </span>
                   <span className="font-semibold">{formatCurrency(c.value)}</span>
@@ -307,8 +397,17 @@ const Reports = () => {
           <>
             <div className="mt-3 h-64 -mx-1">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={dailySeries} margin={{ top: 12, right: 8, bottom: 0, left: 4 }} barCategoryGap="20%">
-                  <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} opacity={0.5} />
+                <BarChart
+                  data={dailySeries}
+                  margin={{ top: 12, right: 8, bottom: 0, left: 4 }}
+                  barCategoryGap="20%"
+                >
+                  <CartesianGrid
+                    stroke="hsl(var(--border))"
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    opacity={0.5}
+                  />
                   <XAxis
                     dataKey="label"
                     stroke="hsl(var(--muted-foreground))"
@@ -335,7 +434,12 @@ const Reports = () => {
                     formatter={(value) => (value === "income" ? "Entradas" : "Saídas")}
                   />
                   <Bar dataKey="income" fill={COLOR_INCOME} radius={[6, 6, 0, 0]} maxBarSize={28} />
-                  <Bar dataKey="expense" fill={COLOR_EXPENSE} radius={[6, 6, 0, 0]} maxBarSize={28} />
+                  <Bar
+                    dataKey="expense"
+                    fill={COLOR_EXPENSE}
+                    radius={[6, 6, 0, 0]}
+                    maxBarSize={28}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             </div>
@@ -343,18 +447,25 @@ const Reports = () => {
             {/* Mini resumo da evolução do saldo */}
             <div className="mt-3 flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2">
               <div>
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Saldo acumulado</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  Saldo acumulado
+                </div>
                 <div
                   className="text-base font-bold"
                   style={{
-                    color: dailySeries[dailySeries.length - 1].balance >= 0 ? COLOR_INCOME : COLOR_EXPENSE,
+                    color:
+                      dailySeries[dailySeries.length - 1].balance >= 0
+                        ? COLOR_INCOME
+                        : COLOR_EXPENSE,
                   }}
                 >
                   {formatCurrency(dailySeries[dailySeries.length - 1].balance)}
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">Dias registrados</div>
+                <div className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                  Dias registrados
+                </div>
                 <div className="text-base font-bold text-foreground">{dailySeries.length}</div>
               </div>
             </div>
@@ -375,29 +486,39 @@ const Reports = () => {
         <div className="mb-3 flex items-center justify-between rounded-xl bg-muted/40 px-3 py-2">
           <div>
             <p className="text-xs font-semibold">Incorporar saldo dos negócios</p>
-            <p className="text-[10px] text-muted-foreground">Soma a receita dos ativos ao saldo geral</p>
+            <p className="text-[10px] text-muted-foreground">
+              Soma a receita dos ativos ao saldo geral
+            </p>
           </div>
           <Switch checked={incorporate} onCheckedChange={setIncorporate} />
         </div>
 
         {bizSummary.total === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">Cadastre ativos em "Meu Negócio" para ver os relatórios.</p>
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            Cadastre ativos em "Meu Negócio" para ver os relatórios.
+          </p>
         ) : (
           <>
             <div className="grid grid-cols-3 gap-2">
               <div className="rounded-2xl bg-emerald-500/10 p-3 text-center">
                 <Package className="mx-auto h-4 w-4 text-emerald-600" />
-                <p className="mt-1 text-lg font-extrabold text-emerald-700">{bizSummary.byCat[0].count}</p>
+                <p className="mt-1 text-lg font-extrabold text-emerald-700">
+                  {bizSummary.byCat[0].count}
+                </p>
                 <p className="text-[10px] uppercase text-muted-foreground">Produtos</p>
               </div>
               <div className="rounded-2xl bg-blue-500/10 p-3 text-center">
                 <Wrench className="mx-auto h-4 w-4 text-blue-600" />
-                <p className="mt-1 text-lg font-extrabold text-blue-700">{bizSummary.byCat[1].count}</p>
+                <p className="mt-1 text-lg font-extrabold text-blue-700">
+                  {bizSummary.byCat[1].count}
+                </p>
                 <p className="text-[10px] uppercase text-muted-foreground">Serviços</p>
               </div>
               <div className="rounded-2xl bg-violet-500/10 p-3 text-center">
                 <GraduationCap className="mx-auto h-4 w-4 text-violet-600" />
-                <p className="mt-1 text-lg font-extrabold text-violet-700">{bizSummary.byCat[2].count}</p>
+                <p className="mt-1 text-lg font-extrabold text-violet-700">
+                  {bizSummary.byCat[2].count}
+                </p>
                 <p className="text-[10px] uppercase text-muted-foreground">Infoprodutos</p>
               </div>
             </div>
@@ -405,24 +526,51 @@ const Reports = () => {
             <div className="mt-4 grid grid-cols-2 gap-2">
               <div className="rounded-xl bg-muted/40 p-3">
                 <p className="text-[10px] uppercase text-muted-foreground">Receita potencial</p>
-                <p className="text-base font-bold text-emerald-600">{formatCurrency(bizSummary.receita)}</p>
+                <p className="text-base font-bold text-emerald-600">
+                  {formatCurrency(bizSummary.receita)}
+                </p>
               </div>
               <div className="rounded-xl bg-muted/40 p-3">
                 <p className="text-[10px] uppercase text-muted-foreground">Margem média</p>
-                <p className="text-base font-bold text-primary">{bizSummary.margemMedia.toFixed(0)}%</p>
+                <p className="text-base font-bold text-primary">
+                  {bizSummary.margemMedia.toFixed(0)}%
+                </p>
               </div>
             </div>
 
             <div className="mt-4 h-56">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={bizSummary.byCat} margin={{ top: 8, right: 8, bottom: 0, left: 4 }}>
-                  <CartesianGrid stroke="hsl(var(--border))" strokeDasharray="3 3" vertical={false} opacity={0.5} />
-                  <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={56} tickFormatter={(v: number) => Math.abs(v) >= 1000 ? `R$${(v/1000).toFixed(1)}k` : `R$${v}`} />
+                  <CartesianGrid
+                    stroke="hsl(var(--border))"
+                    strokeDasharray="3 3"
+                    vertical={false}
+                    opacity={0.5}
+                  />
+                  <XAxis
+                    dataKey="name"
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="hsl(var(--muted-foreground))"
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    width={56}
+                    tickFormatter={(v: number) =>
+                      Math.abs(v) >= 1000 ? `R$${(v / 1000).toFixed(1)}k` : `R$${v}`
+                    }
+                  />
                   <Tooltip formatter={(v: number) => formatCurrency(v)} />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]} maxBarSize={48}>
                     {bizSummary.byCat.map((_, i) => (
-                      <Cell key={i} fill={["hsl(152 70% 42%)", "hsl(217 91% 55%)", "hsl(270 70% 55%)"][i]} />
+                      <Cell
+                        key={i}
+                        fill={["hsl(152 70% 42%)", "hsl(217 91% 55%)", "hsl(270 70% 55%)"][i]}
+                      />
                     ))}
                   </Bar>
                 </BarChart>
