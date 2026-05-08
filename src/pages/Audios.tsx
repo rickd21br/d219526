@@ -175,27 +175,29 @@ function BonusAudioCard({
                             >
                               {playing ? <Pause className="h-4 w-4" strokeWidth={3} /> : <Play className="ml-0.5 h-4 w-4" strokeWidth={3} />}
                             </button>
-                            <select
-                              value={speed}
-                              onChange={(e) => { e.stopPropagation(); onSpeedChange(Number(e.target.value)); }}
-                              onClick={(e) => e.stopPropagation()}
-                              aria-label="Velocidade"
-                              className="ml-auto h-7 shrink-0 rounded-full bg-secondary px-2 text-[10px] font-bold text-foreground outline-none"
-                            >
-                              <option value={0.75}>0.75x</option>
-                              <option value={1}>1.0x</option>
-                              <option value={1.25}>1.25x</option>
-                              <option value={1.5}>1.5x</option>
-                              <option value={2}>2.0x</option>
-                            </select>
-                            <button
-                              type="button"
-                              onClick={(e) => { e.stopPropagation(); onSaveProgress(); }}
-                              aria-label="Salvar ponto"
-                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground active:scale-95"
-                            >
-                              <Save className="h-3.5 w-3.5" />
-                            </button>
+                            <div className="ml-auto flex items-center gap-1 rounded-full bg-secondary p-1">
+                              <select
+                                value={speed}
+                                onChange={(e) => { e.stopPropagation(); onSpeedChange(Number(e.target.value)); }}
+                                onClick={(e) => e.stopPropagation()}
+                                aria-label="Velocidade"
+                                className="h-6 shrink-0 rounded-full bg-transparent px-1.5 text-[10px] font-bold text-foreground outline-none"
+                              >
+                                <option value={0.75}>0.75x</option>
+                                <option value={1}>1.0x</option>
+                                <option value={1.25}>1.25x</option>
+                                <option value={1.5}>1.5x</option>
+                                <option value={2}>2.0x</option>
+                              </select>
+                              <button
+                                type="button"
+                                onClick={(e) => { e.stopPropagation(); onSaveProgress(); }}
+                                aria-label="Salvar ponto"
+                                className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-foreground active:scale-95"
+                              >
+                                <Save className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
                           <input
                             type="range"
