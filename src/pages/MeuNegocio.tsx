@@ -374,8 +374,8 @@ const MeuNegocio = () => {
                 count={sales.filter((s) => s.status === "Pago").length}
                 countLabel="vendas realizadas"
                 addLabel="Adicionar Venda"
-                onOpen={() => toast.info("Listagem de vendas: em breve")}
-                onAdd={() => toast.info("Formulário de Nova Venda: em breve")}
+                onOpen={() => setSaleOpen(true)}
+                onAdd={() => setSaleOpen(true)}
               />
             </div>
           </section>
