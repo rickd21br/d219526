@@ -482,9 +482,11 @@ function AudioListItem({
 
 /* ---------- Sub-componentes ---------- */
 
-function MentorAvatar({ playing }: { playing: boolean }) {
+function MentorAvatar({ playing, compact = false }: { playing: boolean; compact?: boolean }) {
+  const size = compact ? "h-12 w-12" : "h-16 w-16";
+  const inner = compact ? "h-10 w-10" : "h-14 w-14";
   return (
-    <div className="relative flex h-16 w-16 shrink-0 items-center justify-center">
+    <div className={cn("relative flex shrink-0 items-center justify-center", size)}>
       <div
         className={cn(
           "absolute inset-0 rounded-full bg-[hsl(var(--primary-glow)/0.35)] blur-md",
@@ -497,9 +499,11 @@ function MentorAvatar({ playing }: { playing: boolean }) {
         src={MENTOR_IMG}
         alt="Mentor do Progresso"
         loading="lazy"
-        className="relative h-14 w-14 rounded-full object-cover"
+        className={cn("relative rounded-full object-cover", inner)}
       />
-      <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-[hsl(var(--primary-glow))] ring-2 ring-[hsl(165_38%_9%)] shadow-[0_0_8px_hsl(var(--primary-glow))]" />
+      {!compact && (
+        <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full bg-[hsl(var(--primary-glow))] ring-2 ring-[hsl(165_38%_9%)] shadow-[0_0_8px_hsl(var(--primary-glow))]" />
+      )}
     </div>
   );
 }
