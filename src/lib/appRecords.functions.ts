@@ -24,9 +24,7 @@ export const loadAppRecord = createServerFn({ method: "GET" })
   });
 
 export const saveAppRecord = createServerFn({ method: "POST" })
-  .inputValidator((input) =>
-    recordKeySchema.extend({ data: z.unknown() }).parse(input)
-  )
+  .inputValidator((input) => recordKeySchema.extend({ data: z.unknown() }).parse(input))
   .handler(async ({ data }) => {
     const { error } = await supabaseAdmin.from("app_records").upsert(
       {
@@ -34,7 +32,7 @@ export const saveAppRecord = createServerFn({ method: "POST" })
         data_key: data.dataKey,
         data: (data.data ?? null) as Json,
       },
-      { onConflict: "owner_key,data_key" }
+      { onConflict: "owner_key,data_key" },
     );
 
     if (error) throw new Error(error.message);

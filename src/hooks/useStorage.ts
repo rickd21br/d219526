@@ -32,9 +32,10 @@ function getInstallOwnerKey() {
   const key = "d21.installId";
   let id = localStorage.getItem(key);
   if (!id) {
-    id = typeof crypto !== "undefined" && "randomUUID" in crypto
-      ? crypto.randomUUID()
-      : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    id =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     localStorage.setItem(key, id);
   }
   return id;
@@ -96,7 +97,8 @@ export function useStorage<T>(key: string, initialValue: T) {
   }, [storageKey, loadRecord]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !shouldCloudSync(storageKey) || !cloudReadyRef.current) return;
+    if (typeof window === "undefined" || !shouldCloudSync(storageKey) || !cloudReadyRef.current)
+      return;
     const ownerKey = getInstallOwnerKey();
     saveRecord({ data: { ownerKey, dataKey: storageKey, data: value } }).catch(() => {
       /* offline or backend unavailable: local data remains saved */
@@ -143,15 +145,14 @@ export function useStorage<T>(key: string, initialValue: T) {
   const setValue = useCallback<typeof setValueState>(
     (next) => {
       setValueState((prev) => {
-        const resolved =
-          typeof next === "function" ? (next as (p: T) => T)(prev) : next;
+        const resolved = typeof next === "function" ? (next as (p: T) => T)(prev) : next;
         // Notifica as outras instâncias com o valor resolvido.
         emit(storageKey, resolved);
         hadLocalValueRef.current = true;
         return resolved;
       });
     },
-    [storageKey]
+    [storageKey],
   );
 
   const reset = useCallback(() => setValue(initialRef.current), [setValue]);
