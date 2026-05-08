@@ -74,6 +74,7 @@ const Onboarding = () => {
   // -1 = inativo; 0..2 = botão em destaque
   const [showcaseIdx, setShowcaseIdx] = useState<number>(-1);
   const [hoverIdx, setHoverIdx] = useState<number>(-1);
+  const [activeIdx, setActiveIdx] = useState<number>(-1);
   const showcaseAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const playShowcaseSound = () => {
