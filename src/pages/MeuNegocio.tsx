@@ -18,6 +18,8 @@ import {
   MoreVertical,
   Eye,
   ArrowUp,
+  HelpCircle,
+  TrendingUp,
 } from "lucide-react";
 import {
   DropdownMenu,
