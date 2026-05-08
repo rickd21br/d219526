@@ -335,30 +335,46 @@ const MeuNegocio = () => {
             <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">
               Meus ativos por categoria
             </p>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-3 px-1">
               <CatCard
-                icon={<Package />}
-                color="emerald"
+                icon={<Package className="h-5 w-5" />}
+                color="amber"
                 label="Produtos"
                 count={products.length}
+                countLabel="ativos cadastrados"
+                addLabel="Adicionar Produto"
                 onOpen={() => setCat("produtos")}
                 onAdd={() => setAddOpen("produtos")}
               />
               <CatCard
-                icon={<Wrench />}
+                icon={<Wrench className="h-5 w-5" />}
                 color="blue"
                 label="Serviços"
                 count={services.length}
+                countLabel="ativos cadastrados"
+                addLabel="Adicionar Serviço"
                 onOpen={() => setCat("servicos")}
                 onAdd={() => setAddOpen("servicos")}
               />
               <CatCard
-                icon={<GraduationCap />}
+                icon={<GraduationCap className="h-5 w-5" />}
                 color="violet"
                 label="Infoprodutos"
                 count={infos.length}
+                countLabel="ativos cadastrados"
+                addLabel="Adicionar Infoproduto"
                 onOpen={() => setCat("info")}
                 onAdd={() => setAddOpen("info")}
+              />
+              <CatCard
+                icon={<TrendingUp className="h-5 w-5" />}
+                color="sales"
+                label="Vendas"
+                count={sales.filter((s) => s.status === "Pago").length}
+                countLabel="vendas realizadas"
+                addLabel="Adicionar Venda"
+                onOpen={() => toast.info("Listagem de vendas: em breve")}
+                onAdd={() => toast.info("Formulário de Nova Venda: em breve")}
               />
             </div>
           </section>
