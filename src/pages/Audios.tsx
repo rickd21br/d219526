@@ -287,7 +287,6 @@ function AudioPlayer({
     return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`;
   };
   const headlineTitle = track ? (track.collection || track.title) : "Selecione um audiobook";
-  const headlineSub = track ? track.title : "Você chegou até aqui. Não pare agora.";
   return (
     <section className="relative mb-5 overflow-hidden rounded-[1.35rem] p-4 text-primary-foreground shadow-floating backdrop-blur" style={{ background: "var(--gradient-card)" }}>
       <button
@@ -309,7 +308,6 @@ function AudioPlayer({
         <div className="min-w-0 flex-1">
           <span className="inline-block rounded-full bg-black/20 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider">Áudio</span>
           <h2 className="mt-1 truncate text-base font-bold leading-tight">{headlineTitle}</h2>
-          <p className="truncate text-xs text-primary-foreground/80">{headlineSub}</p>
         </div>
       </div>
 
@@ -497,7 +495,7 @@ const Audios = () => {
           <Headphones className="h-6 w-6 text-primary" /> Bônus Exclusivo
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Best sellers com capa, cortina e playlist integrada.
+          Você chegou até aqui. Não pare agora.
         </p>
       </header>
 
