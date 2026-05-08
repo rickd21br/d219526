@@ -20,8 +20,8 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
       end={end}
       className={({ isActive }: { isActive: boolean }) =>
         cn(
-          "flex flex-1 flex-col items-center justify-end gap-1 pt-1 transition-smooth",
-          isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+          "group flex flex-1 flex-col items-center justify-end gap-1 pt-1 text-center transition-smooth hover:text-primary",
+          isActive ? "text-primary" : "text-muted-foreground"
         )
       }
       aria-label={label}
@@ -29,10 +29,13 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
       {({ isActive }: { isActive: boolean }) => (
         <>
           <Icon
-            className={cn("h-5 w-5 transition-smooth", isActive && "scale-110")}
+            className={cn(
+              "h-5 w-5 transition-smooth group-hover:scale-110 group-hover:text-primary group-hover:drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]",
+              isActive && "scale-110 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]"
+            )}
             strokeWidth={isActive ? 2.5 : 2}
           />
-          <span className={cn("text-[10px] leading-none", isActive && "font-semibold")}>
+          <span className={cn("text-center text-[10px] leading-none", isActive && "font-semibold text-primary")}>
             {label}
           </span>
         </>
