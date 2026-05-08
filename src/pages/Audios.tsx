@@ -163,8 +163,9 @@ function BonusAudioCard({
                   return (
                     <div key={track.id}>
                       {selected ? (
-                        <div className="rounded-2xl border border-primary/30 bg-card px-2 py-2 shadow-soft">
-                          <p className="mb-1.5 truncate px-1 text-[11px] font-bold leading-tight text-foreground">{track.title}</p>
+                        <div className="space-y-1.5">
+                          <p className="truncate px-1 text-[11px] font-bold leading-tight text-foreground">{track.title}</p>
+                          <div className="rounded-2xl border border-primary/30 bg-card px-2 py-2 shadow-soft">
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
@@ -211,6 +212,7 @@ function BonusAudioCard({
                           <div className="mt-1 flex items-center justify-between px-1 text-[9px] font-semibold tabular-nums text-muted-foreground">
                             <span>{fmt(currentTime)}</span>
                             <span>{fmt(duration)}</span>
+                          </div>
                           </div>
                         </div>
                       ) : (
