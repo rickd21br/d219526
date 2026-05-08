@@ -540,37 +540,17 @@ const Onboarding = () => {
                 </div>
               </div>
 
-              {/* Login social (visual / fake) */}
-              <div className="grid grid-cols-2 gap-2 pt-1">
-                <button
-                  type="button"
-                  onClick={() => toast.info("Em breve: login com Google")}
-                  className="flex h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/95 text-sm font-semibold text-foreground transition hover:bg-white"
-                >
-                  <img src={googleLogo} alt="" className="h-4 w-4" />
-                  Google
-                </button>
-                <button
-                  type="button"
-                  onClick={() => toast.info("Em breve: login com Apple")}
-                  className="flex h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-black text-sm font-semibold text-white transition hover:bg-black/85"
-                >
-                  <img src={appleLogo} alt="" className="h-4 w-4 invert" />
-                  Apple
-                </button>
-              </div>
-
               <Button
                 type="submit"
-                className="h-12 w-full rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-elevated transition hover:bg-primary/90"
+                className="relative z-10 mt-2 h-12 w-full rounded-2xl bg-primary text-base font-semibold text-primary-foreground shadow-elevated transition hover:bg-primary/90"
               >
                 Entrar
               </Button>
 
               <button
                 type="button"
-                onClick={openPinLogin}
-                className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl border text-sm font-semibold transition ${
+                onClick={(e) => { e.stopPropagation(); openPinLogin(); }}
+                className={`relative z-10 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border text-sm font-semibold transition ${
                   pinExists
                     ? "border-white/30 bg-white/10 text-white hover:bg-white/20"
                     : "border-white/15 bg-white/5 text-white/50 hover:bg-white/10"
@@ -584,6 +564,27 @@ const Onboarding = () => {
                   Disponível após você concluir a validação de acesso e criar um PIN.
                 </p>
               )}
+
+              {/* Login social — movido para baixo do PIN, com espaçamento extra */}
+              <div className="relative z-10 mt-6 grid grid-cols-2 gap-2 border-t border-white/10 pt-5">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); toast.info("Em breve: login com Google"); }}
+                  className="flex h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-white/95 text-sm font-semibold text-foreground transition hover:bg-white"
+                >
+                  <img src={googleLogo} alt="" className="h-4 w-4" />
+                  Google
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); toast.info("Em breve: login com Apple"); }}
+                  className="flex h-11 items-center justify-center gap-2 rounded-xl border border-white/25 bg-black text-sm font-semibold text-white transition hover:bg-black/85"
+                >
+                  <img src={appleLogo} alt="" className="h-4 w-4 invert" />
+                  Apple
+                </button>
+              </div>
+
               <ul className="mt-3 grid grid-cols-4 gap-2 text-center">
                 {[
                   { Icon: Wallet, label: "Controle\ntotal" },
