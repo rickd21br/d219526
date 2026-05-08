@@ -84,7 +84,7 @@ export function BottomNav() {
         </div>
 
         {rightTabs.map((t) => (
-          <div key={t.to} className="flex items-stretch justify-center">
+          <div key={t.to} className="flex h-full items-center justify-center">
             <TabLink {...t} />
           </div>
         ))}
