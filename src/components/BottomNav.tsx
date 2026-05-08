@@ -44,16 +44,15 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
 export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-xl safe-bottom">
-      <div className="relative mx-auto flex h-16 max-w-md items-end px-2 pb-2">
-        {/* Left icons */}
-        <div className="flex flex-1 items-end justify-around">
-          {leftTabs.map((t) => (
-            <TabLink key={t.to} {...t} />
-          ))}
-        </div>
+      <div className="relative mx-auto grid h-16 max-w-md grid-cols-5 items-end px-2 pb-2">
+        {leftTabs.map((t) => (
+          <div key={t.to} className="flex items-end justify-center">
+            <TabLink {...t} />
+          </div>
+        ))}
 
         {/* Center floating action button + label */}
-        <div className="flex w-20 flex-col items-center justify-end pb-0">
+        <div className="flex flex-col items-center justify-end pb-0">
           <div className="pointer-events-none p-1">
             <AddTransactionDialog
               trigger={
@@ -77,12 +76,11 @@ export function BottomNav() {
           </span>
         </div>
 
-        {/* Right icons */}
-        <div className="flex flex-1 items-end justify-around">
-          {rightTabs.map((t) => (
-            <TabLink key={t.to} {...t} />
-          ))}
-        </div>
+        {rightTabs.map((t) => (
+          <div key={t.to} className="flex items-end justify-center">
+            <TabLink {...t} />
+          </div>
+        ))}
       </div>
     </nav>
   );
