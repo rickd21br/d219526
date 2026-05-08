@@ -1062,7 +1062,7 @@ function ServiceForm({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label>Pagamento</Label>
-          <Select value={f.type} onValueChange={(v) => set("type", v)}>
+          <Select value={f.type} onValueChange={(v) => set("type", v as Service["type"])}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -1080,7 +1080,7 @@ function ServiceForm({
       {f.type === "recorrente" && (
         <div>
           <Label>Periodicidade</Label>
-          <Select value={f.recurrence || "mensal"} onValueChange={(v) => set("recurrence", v)}>
+          <Select value={f.recurrence || "mensal"} onValueChange={(v) => set("recurrence", v as Recurrence)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -1404,7 +1404,7 @@ function InfoForm({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label>Tipo comissão</Label>
-          <Select value={f.commissionType} onValueChange={(v) => set("commissionType", v)}>
+          <Select value={f.commissionType} onValueChange={(v) => set("commissionType", v as Infoproduct["commissionType"])}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -1777,7 +1777,7 @@ function SaleForm({
       <div className="grid grid-cols-2 gap-2">
         <div>
           <Label>Pagamento</Label>
-          <Select value={f.payment} onValueChange={(v) => set("payment", v)}>
+          <Select value={f.payment} onValueChange={(v) => set("payment", v as PaymentMethod)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -1792,7 +1792,7 @@ function SaleForm({
         </div>
         <div>
           <Label>Status</Label>
-          <Select value={f.status} onValueChange={(v) => set("status", v)}>
+          <Select value={f.status} onValueChange={(v) => set("status", v as SaleStatus)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
