@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { NewSaleDialog } from "@/components/NewSaleDialog";
 
 // ---------- Types ----------
 type Contact = { name: string; phone?: string; email?: string; address?: string };
