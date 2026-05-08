@@ -776,7 +776,7 @@ const Onboarding = () => {
               <img
                 src={logoD21}
                 alt="D21"
-                className="h-16 w-16 rounded-2xl shadow-[0_8px_24px_rgba(0,0,0,0.45)]"
+                className="h-16 w-16 rounded-full drop-shadow-[0_6px_16px_rgba(0,0,0,0.4)]"
               />
               <h2 className="mt-3 text-lg font-bold text-foreground">D21 App</h2>
               <p className="text-xs font-semibold text-primary">Boletos Pagos</p>
