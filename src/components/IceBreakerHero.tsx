@@ -22,7 +22,7 @@ const SPEEDS = [1, 1.25, 1.5, 2] as const;
 
 export function IceBreakerHero() {
   const { state, setProgress, isCompleted, getProgress } = useIceBreakerProgress();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [positions, setPositions] = useStorage<Record<string, number>>("d21.iceBreakerPos", {});
   const [resumePrompt, setResumePrompt] = useState<{ id: string; saved: number } | null>(null);
