@@ -834,8 +834,8 @@ function ProductForm({
       supplier: { name: "" },
     },
   );
-  const set = (k: keyof Product, v: any) => setF((p) => ({ ...p, [k]: v }));
-  const setSup = (k: keyof Contact, v: any) =>
+  const set = <K extends keyof Product>(k: K, v: Product[K]) => setF((p) => ({ ...p, [k]: v }));
+  const setSup = <K extends keyof Contact>(k: K, v: Contact[K]) =>
     setF((p) => ({ ...p, supplier: { ...(p.supplier || { name: "" }), [k]: v } }));
 
   return (
@@ -1034,8 +1034,8 @@ function ServiceForm({
       client: { name: "" },
     },
   );
-  const set = (k: keyof Service, v: any) => setF((p) => ({ ...p, [k]: v }));
-  const setCli = (k: keyof Contact, v: any) =>
+  const set = <K extends keyof Service>(k: K, v: Service[K]) => setF((p) => ({ ...p, [k]: v }));
+  const setCli = <K extends keyof Contact>(k: K, v: Contact[K]) =>
     setF((p) => ({ ...p, client: { ...(p.client || { name: "" }), [k]: v } }));
   const toggleMethod = (m: PayMethod) =>
     set("methods", f.methods.includes(m) ? f.methods.filter((x) => x !== m) : [...f.methods, m]);
@@ -1384,7 +1384,8 @@ function InfoForm({
       description: "",
     },
   );
-  const set = (k: keyof Infoproduct, v: any) => setF((p) => ({ ...p, [k]: v }));
+  const set = <K extends keyof Infoproduct>(k: K, v: Infoproduct[K]) =>
+    setF((p) => ({ ...p, [k]: v }));
   const calcCommission =
     f.commissionType === "percent" ? (f.price * f.commission) / 100 : f.commission;
   return (
@@ -1731,7 +1732,7 @@ function SaleForm({
       chargeback: false,
     },
   );
-  const set = (k: keyof Sale, v: any) => setF((p) => ({ ...p, [k]: v }));
+  const set = <K extends keyof Sale>(k: K, v: Sale[K]) => setF((p) => ({ ...p, [k]: v }));
   return (
     <div className="space-y-3">
       <div>
