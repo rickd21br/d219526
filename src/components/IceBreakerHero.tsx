@@ -246,22 +246,7 @@ export function IceBreakerHero() {
         </DialogContent>
       </Dialog>
 
-      {/* Troféu Gold */}
-      {trophyFor && (
-        <div className="pointer-events-none fixed inset-0 z-[60] flex items-center justify-center">
-          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in" />
-          <div className="relative flex flex-col items-center gap-3 animate-scale-in">
-            <img
-              src={trofeuGold}
-              alt="Troféu de conclusão"
-              className="h-32 w-32 drop-shadow-[0_0_30px_hsl(45_95%_58%/0.8)]"
-            />
-            <p className="rounded-full bg-[hsl(45_95%_58%)] px-4 py-1.5 text-sm font-black text-[hsl(165_40%_8%)] shadow-[0_0_20px_hsl(45_95%_58%/0.7)]">
-              +15 XP · Conselho concluído!
-            </p>
-          </div>
-        </div>
-      )}
+      {/* Troféu Gold (apenas no item da lista; aqui só dispara o som) */}
     </section>
   );
 }
