@@ -20,7 +20,7 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
       end={end}
       className={({ isActive }: { isActive: boolean }) =>
         cn(
-          "group flex h-full w-full flex-col items-center justify-center gap-1 text-center transition-smooth hover:text-primary",
+          "group flex h-full w-full flex-col items-center justify-center gap-1 self-center text-center transition-smooth hover:text-primary",
           isActive ? "text-primary" : "text-muted-foreground"
         )
       }
@@ -30,14 +30,14 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
         <>
           <Icon
             className={cn(
-              "h-5 w-5 shrink-0 transition-smooth group-hover:scale-110 group-hover:text-primary group-hover:drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]",
+              "h-5 w-5 mx-auto shrink-0 transition-smooth group-hover:scale-110 group-hover:text-primary group-hover:drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]",
               isActive && "scale-110 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]"
             )}
             strokeWidth={isActive ? 2.5 : 2}
           />
           <span
             className={cn(
-              "text-center text-[10px] leading-none",
+              "block w-full text-center text-[10px] leading-none",
               isActive && "font-semibold text-primary"
             )}
           >
