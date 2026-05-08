@@ -20,7 +20,7 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
       end={end}
       className={({ isActive }: { isActive: boolean }) =>
         cn(
-          "group flex flex-1 flex-col items-center justify-end gap-1 pt-1 text-center transition-smooth hover:text-primary",
+          "group flex h-full w-full flex-col items-center justify-center gap-1 text-center transition-smooth hover:text-primary",
           isActive ? "text-primary" : "text-muted-foreground"
         )
       }
@@ -30,12 +30,17 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
         <>
           <Icon
             className={cn(
-              "h-5 w-5 transition-smooth group-hover:scale-110 group-hover:text-primary group-hover:drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]",
+              "h-5 w-5 shrink-0 transition-smooth group-hover:scale-110 group-hover:text-primary group-hover:drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]",
               isActive && "scale-110 text-primary drop-shadow-[0_0_6px_hsl(var(--primary)/0.6)]"
             )}
             strokeWidth={isActive ? 2.5 : 2}
           />
-          <span className={cn("text-center text-[10px] leading-none", isActive && "font-semibold text-primary")}>
+          <span
+            className={cn(
+              "block w-full truncate text-center text-[10px] leading-none",
+              isActive && "font-semibold text-primary"
+            )}
+          >
             {label}
           </span>
         </>
@@ -47,40 +52,37 @@ function TabLink({ to, label, icon: Icon, end }: { to: string; label: string; ic
 export function BottomNav() {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-xl safe-bottom">
-      <div className="relative mx-auto grid h-16 max-w-md grid-cols-5 items-end px-2 pb-2">
+      <div className="relative mx-auto grid h-16 w-full max-w-md grid-cols-5 items-stretch px-1">
         {leftTabs.map((t) => (
-          <div key={t.to} className="flex items-end justify-center">
+          <div key={t.to} className="flex items-stretch justify-center">
             <TabLink {...t} />
           </div>
         ))}
 
         {/* Center floating action button + label */}
-        <div className="flex flex-col items-center justify-end pb-0">
-          <div className="pointer-events-none p-1">
-            <AddTransactionDialog
-              trigger={
-                <button
-                  type="button"
-                  aria-label="Novo Lançamento"
-                  style={{
-                    transform: "translateY(-18px)",
-                    backgroundColor: "hsl(var(--primary))",
-                    boxShadow: "0px 8px 20px rgba(0,0,0,0.18)",
-                  }}
-                  className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground transition-smooth hover:opacity-90 active:scale-95"
-                >
-                  <Plus className="h-6 w-6 text-white" strokeWidth={2.75} />
-                </button>
-              }
-            />
-          </div>
-          <span className="-mt-3 text-[10px] font-semibold leading-none text-primary">
+        <div className="flex h-full flex-col items-center justify-center">
+          <AddTransactionDialog
+            trigger={
+              <button
+                type="button"
+                aria-label="Novo Lançamento"
+                style={{
+                  backgroundColor: "hsl(var(--primary))",
+                  boxShadow: "0px 8px 20px rgba(0,0,0,0.18)",
+                }}
+                className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full text-primary-foreground transition-smooth hover:opacity-90 active:scale-95"
+              >
+                <Plus className="h-6 w-6 text-white" strokeWidth={2.75} />
+              </button>
+            }
+          />
+          <span className="mt-1 block w-full truncate text-center text-[10px] font-semibold leading-none text-primary">
             Novo
           </span>
         </div>
 
         {rightTabs.map((t) => (
-          <div key={t.to} className="flex items-end justify-center">
+          <div key={t.to} className="flex items-stretch justify-center">
             <TabLink {...t} />
           </div>
         ))}
