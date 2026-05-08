@@ -83,11 +83,8 @@ const Home = () => {
 
   return (
     <MobileShell>
-      {/* MENTOR DO PROGRESSO ONLINE — primeiro acesso */}
-      <IceBreakerHero />
-
       {/* SALDO */}
-      <section className="relative mt-5 overflow-hidden rounded-3xl gradient-card p-6 text-primary-foreground shadow-elevated">
+      <section className="relative overflow-hidden rounded-3xl gradient-card p-6 text-primary-foreground shadow-elevated">
         <div className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
         <div className="flex items-center gap-2 text-xs font-medium opacity-90">
           <Wallet className="h-4 w-4" />
@@ -120,7 +117,10 @@ const Home = () => {
         </div>
       </section>
 
-      {/* DICAS DO DIA — slider infinito abaixo do Saldo */}
+      {/* MENTOR DO PROGRESSO ONLINE — abaixo do saldo */}
+      <div className="mt-5"><IceBreakerHero /></div>
+
+      {/* DICAS DO DIA — slider infinito */}
       <TipsCarousel />
 
       {/* INÍCIO — 3 cards abaixo do Mentor */}
