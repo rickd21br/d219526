@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "D21 App" },
+      { name: "description", content: "E se 21 Dias forem tudo que separa você da vida que sempre sonhou? Entre agora no App D21, um desafio de 21 dias para mudar sua vida." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "D21 App" },
+      { property: "og:description", content: "E se 21 Dias forem tudo que separa você da vida que sempre sonhou? Entre agora no App D21, um desafio de 21 dias para mudar sua vida." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "D21 App" },
+      { name: "twitter:description", content: "E se 21 Dias forem tudo que separa você da vida que sempre sonhou? Entre agora no App D21, um desafio de 21 dias para mudar sua vida." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/2mcz8fGlY3fW2qZay6GZyXLf8N02/social-images/social-1778207742099-sociald21.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/2mcz8fGlY3fW2qZay6GZyXLf8N02/social-images/social-1778207742099-sociald21.webp" },
     ],
     links: [
       {
