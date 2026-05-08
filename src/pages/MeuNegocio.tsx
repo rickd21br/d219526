@@ -203,6 +203,7 @@ type Cat = "produtos" | "servicos" | "info" | null;
 const MeuNegocio = () => {
   const [cat, setCat] = useState<Cat>(null);
   const [addOpen, setAddOpen] = useState<Cat>(null);
+  const [saleOpen, setSaleOpen] = useState(false);
   const [products, setProducts] = useStorage<Product[]>("d21.mn.products", []);
   const [services, setServices] = useStorage<Service[]>("d21.mn.services", []);
   const [infos, setInfos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
