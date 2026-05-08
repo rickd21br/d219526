@@ -1,5 +1,5 @@
 import { Bell, Menu, Home, Target, Plus, BarChart3, User as UserIcon, Sun, Moon, Settings, LogOut } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import triggerIcon from "@/assets/highlights/trigger.png";
 import mentorIcon from "@/assets/highlights/mentor.png";
@@ -215,7 +215,7 @@ export function TopBar() {
       <Dialog open={!!activeHighlight} onOpenChange={(o) => !o && setActiveHighlight(null)}>
         <DialogContent className="max-w-sm rounded-3xl">
           {(() => {
-            const map: Record<string, { icon: string; title: string; description: React.ReactNode; cta: string; onCta: () => void; }> = {
+            const map: Record<string, { icon: string; title: string; description: ReactNode; cta: string; onCta: () => void; }> = {
               mentor: {
                 icon: mentorIcon,
                 title: "Mentor 24 Horas",
