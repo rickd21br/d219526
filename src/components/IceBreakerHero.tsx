@@ -22,7 +22,7 @@ const SPEEDS = [1, 1.25, 1.5, 2] as const;
 
 export function IceBreakerHero() {
   const { state, setProgress, isCompleted, getProgress } = useIceBreakerProgress();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [positions, setPositions] = useStorage<Record<string, number>>("d21.iceBreakerPos", {});
   const [resumePrompt, setResumePrompt] = useState<{ id: string; saved: number } | null>(null);
@@ -96,7 +96,7 @@ export function IceBreakerHero() {
             <MentorAvatar playing={!!activeId} compact />
             <div className="min-w-0 flex-1">
               <p className="flex items-center gap-2 truncate text-sm font-extrabold leading-tight">
-                <span className="truncate">Mentor do Progresso</span>
+                <span className="truncate">Mentor 21D</span>
                 <span className="shrink-0 rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-300 shadow-[0_0_10px_hsl(45_95%_60%/0.35)]">
                   Comece Aqui!
                 </span>
