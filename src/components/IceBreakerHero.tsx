@@ -288,6 +288,7 @@ function AudioListItem({
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [playing, setPlaying] = useState(false);
   const [speedIdx, setSpeedIdx] = useState(0);
+  const [xpBurst, setXpBurst] = useState(false);
   const userPausedRef = useRef(false);
 
   const speed = SPEEDS[speedIdx];
