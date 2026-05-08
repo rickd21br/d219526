@@ -93,7 +93,7 @@ export function TipsCarousel() {
       <div
         ref={scrollerRef}
         onScroll={handleScroll}
-        className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-8 pb-3 pt-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-mx-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-5 pb-3 pt-2 sm:px-8 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {LOOP.map((tip, i) => {
           const active = i === activeIdx;
@@ -102,10 +102,10 @@ export function TipsCarousel() {
               key={`${i}-${tip}`}
               data-tip-card
               className={[
-                "min-w-[78%] snap-center rounded-3xl border bg-gradient-to-br from-amber-400/10 via-card to-card p-4 shadow-soft transition-all duration-500 ease-out sm:min-w-[64%]",
+                "w-[calc(100%-2.5rem)] shrink-0 snap-center rounded-3xl border bg-gradient-to-br from-amber-400/10 via-card to-card p-4 shadow-soft transition-all duration-500 ease-out sm:w-[64%]",
                 active
                   ? "scale-100 opacity-100 border-amber-400/40 shadow-elevated"
-                  : "scale-[0.88] opacity-60 border-amber-400/20",
+                  : "scale-[0.92] opacity-60 border-amber-400/20 sm:scale-[0.88]",
               ].join(" ")}
             >
               <div className="flex items-start gap-3">
