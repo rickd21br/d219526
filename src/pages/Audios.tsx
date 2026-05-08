@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { INSPIRATION_LIBRARY, InspirationAudio, InspirationTrack } from "@/data/inspirationLibrary";
-import { Headphones, Pause, Play, ChevronDown, ListMusic, Star, Trophy, RotateCcw, LayoutGrid, Rows3, Save, Gauge, SkipBack, SkipForward, RotateCw, MoreVertical, BookOpen } from "lucide-react";
+import { Headphones, Pause, Play, ChevronDown, ListMusic, Star, Trophy, RotateCcw, LayoutGrid, Rows3, Save, MoreVertical, BookOpen } from "lucide-react";
 import { useStorage } from "@/hooks/useStorage";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -163,58 +163,57 @@ function BonusAudioCard({
                   return (
                     <div key={track.id}>
                       {selected ? (
-                        <div
-                          className="flex items-center gap-2 rounded-2xl px-2 py-2 text-primary-foreground shadow-soft"
-                          style={{ background: "var(--gradient-card)" }}
-                        >
-                          <button
-                            type="button"
-                            onClick={() => onTrackPlay(item, track)}
-                            aria-label={playing ? "Pausar" : "Tocar"}
-                            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-foreground text-primary shadow-glow active:scale-95"
-                          >
-                            {playing ? <Pause className="h-4 w-4" strokeWidth={3} /> : <Play className="ml-0.5 h-4 w-4" strokeWidth={3} />}
-                          </button>
-                          <div className="min-w-0 flex-1">
-                            <p className="truncate text-[11px] font-bold leading-tight">{track.title}</p>
-                            <input
-                              type="range"
-                              min={0}
-                              max={duration || 0}
-                              step={0.1}
-                              value={Math.min(currentTime, duration || 0)}
-                              onChange={(e) => { e.stopPropagation(); onSeek(Number(e.target.value)); }}
+                        <div className="space-y-1.5">
+                          <p className="truncate px-1 text-[11px] font-bold leading-tight text-foreground">{track.title}</p>
+                          <div className="rounded-2xl border border-primary/30 bg-card px-2 py-2 shadow-soft">
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => onTrackPlay(item, track)}
+                              aria-label={playing ? "Pausar" : "Tocar"}
+                              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow active:scale-95"
+                            >
+                              {playing ? <Pause className="h-4 w-4" strokeWidth={3} /> : <Play className="ml-0.5 h-4 w-4" strokeWidth={3} />}
+                            </button>
+                            <select
+                              value={speed}
+                              onChange={(e) => { e.stopPropagation(); onSpeedChange(Number(e.target.value)); }}
                               onClick={(e) => e.stopPropagation()}
-                              aria-label="Posição"
-                              className="audio-range-mini mt-1 w-full"
-                              style={{ ['--pct' as any]: `${duration ? (currentTime / duration) * 100 : 0}%` }}
-                            />
-                            <div className="mt-0.5 flex items-center justify-between text-[9px] font-semibold tabular-nums">
-                              <span>{fmt(currentTime)}</span>
-                              <span>{fmt(duration)}</span>
-                            </div>
+                              aria-label="Velocidade"
+                              className="ml-auto h-7 shrink-0 rounded-full bg-secondary px-2 text-[10px] font-bold text-foreground outline-none"
+                            >
+                              <option value={0.75}>0.75x</option>
+                              <option value={1}>1.0x</option>
+                              <option value={1.25}>1.25x</option>
+                              <option value={1.5}>1.5x</option>
+                              <option value={2}>2.0x</option>
+                            </select>
+                            <button
+                              type="button"
+                              onClick={(e) => { e.stopPropagation(); onSaveProgress(); }}
+                              aria-label="Salvar ponto"
+                              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-secondary text-foreground active:scale-95"
+                            >
+                              <Save className="h-3.5 w-3.5" />
+                            </button>
                           </div>
-                          <select
-                            value={speed}
-                            onChange={(e) => { e.stopPropagation(); onSpeedChange(Number(e.target.value)); }}
+                          <input
+                            type="range"
+                            min={0}
+                            max={duration || 0}
+                            step={0.1}
+                            value={Math.min(currentTime, duration || 0)}
+                            onChange={(e) => { e.stopPropagation(); onSeek(Number(e.target.value)); }}
                             onClick={(e) => e.stopPropagation()}
-                            aria-label="Velocidade"
-                            className="h-7 shrink-0 rounded-full bg-black/20 px-2 text-[10px] font-bold text-primary-foreground outline-none"
-                          >
-                            <option className="text-foreground" value={0.75}>0.75x</option>
-                            <option className="text-foreground" value={1}>1.0x</option>
-                            <option className="text-foreground" value={1.25}>1.25x</option>
-                            <option className="text-foreground" value={1.5}>1.5x</option>
-                            <option className="text-foreground" value={2}>2.0x</option>
-                          </select>
-                          <button
-                            type="button"
-                            onClick={(e) => { e.stopPropagation(); onSaveProgress(); }}
-                            aria-label="Salvar ponto"
-                            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-black/20 active:scale-95"
-                          >
-                            <Save className="h-3.5 w-3.5" />
-                          </button>
+                            aria-label="Posição"
+                            className="audio-range-mini mt-2 w-full"
+                            style={{ ['--pct' as any]: `${duration ? (currentTime / duration) * 100 : 0}%`, background: `linear-gradient(to right, hsl(var(--primary)) 0%, hsl(var(--primary)) ${duration ? (currentTime / duration) * 100 : 0}%, hsl(var(--secondary)) ${duration ? (currentTime / duration) * 100 : 0}%, hsl(var(--secondary)) 100%)` }}
+                          />
+                          <div className="mt-1 flex items-center justify-between px-1 text-[9px] font-semibold tabular-nums text-muted-foreground">
+                            <span>{fmt(currentTime)}</span>
+                            <span>{fmt(duration)}</span>
+                          </div>
+                          </div>
                         </div>
                       ) : (
                         <button
@@ -297,9 +296,6 @@ function AudioPlayer({
           <h2 className="mt-1 truncate text-base font-bold leading-tight">{track ? track.title : "Selecione um audiobook"}</h2>
           <p className="truncate text-xs text-primary-foreground/80">{track ? track.subtitle : "Você chegou até aqui. Não pare agora."}</p>
         </div>
-        <button type="button" aria-label="Mais opções" className="flex h-8 w-8 items-center justify-center rounded-full bg-black/15 text-primary-foreground/90 active:scale-95">
-          <MoreVertical className="h-4 w-4" />
-        </button>
       </div>
 
       <div className="mt-4">
@@ -322,13 +318,6 @@ function AudioPlayer({
       </div>
 
       <div className="mt-3 flex items-center gap-2">
-        <button type="button" onClick={() => onSkip(-15)} disabled={!track} aria-label="Voltar 15s" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/15 active:scale-95 disabled:opacity-50">
-          <RotateCcw className="h-5 w-5" />
-          <span className="absolute text-[8px] font-bold">15</span>
-        </button>
-        <button type="button" onClick={onPrev} disabled={!track} aria-label="Faixa anterior" className="flex h-10 w-10 items-center justify-center rounded-full active:scale-95 disabled:opacity-50">
-          <SkipBack className="h-5 w-5 fill-current" />
-        </button>
         <button
           type="button"
           onClick={onToggle}
@@ -338,15 +327,8 @@ function AudioPlayer({
         >
           {playing ? <Pause className="h-6 w-6" strokeWidth={3} /> : <Play className="ml-0.5 h-6 w-6" strokeWidth={3} />}
         </button>
-        <button type="button" onClick={onNext} disabled={!track} aria-label="Próxima faixa" className="flex h-10 w-10 items-center justify-center rounded-full active:scale-95 disabled:opacity-50">
-          <SkipForward className="h-5 w-5 fill-current" />
-        </button>
-        <button type="button" onClick={() => onSkip(15)} disabled={!track} aria-label="Avançar 15s" className="relative flex h-10 w-10 items-center justify-center rounded-full bg-black/15 active:scale-95 disabled:opacity-50">
-          <RotateCw className="h-5 w-5" />
-          <span className="absolute text-[8px] font-bold">15</span>
-        </button>
         <span className="mx-1 h-8 w-px bg-primary-foreground/20" />
-        <div className="relative">
+        <div className="relative ml-auto">
           <select
             aria-label="Velocidade do áudio"
             value={speed}
