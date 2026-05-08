@@ -48,6 +48,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { NewSaleDialog } from "@/components/NewSaleDialog";
 
 // ---------- Types ----------
 type Contact = { name: string; phone?: string; email?: string; address?: string };
@@ -203,6 +204,7 @@ type Cat = "produtos" | "servicos" | "info" | null;
 const MeuNegocio = () => {
   const [cat, setCat] = useState<Cat>(null);
   const [addOpen, setAddOpen] = useState<Cat>(null);
+  const [saleOpen, setSaleOpen] = useState(false);
   const [products, setProducts] = useStorage<Product[]>("d21.mn.products", []);
   const [services, setServices] = useStorage<Service[]>("d21.mn.services", []);
   const [infos, setInfos] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
@@ -373,8 +375,8 @@ const MeuNegocio = () => {
                 count={sales.filter((s) => s.status === "Pago").length}
                 countLabel="vendas realizadas"
                 addLabel="Adicionar Venda"
-                onOpen={() => toast.info("Listagem de vendas: em breve")}
-                onAdd={() => toast.info("Formulário de Nova Venda: em breve")}
+                onOpen={() => setSaleOpen(true)}
+                onAdd={() => setSaleOpen(true)}
               />
             </div>
           </section>
@@ -404,6 +406,7 @@ const MeuNegocio = () => {
             </DialogContent>
           </Dialog>
 
+          <NewSaleDialog open={saleOpen} onOpenChange={setSaleOpen} />
           <section>
             <div className="mb-2 flex items-center justify-between">
               <p className="text-xs font-bold uppercase text-muted-foreground">Seus negócios</p>
@@ -1278,9 +1281,7 @@ function ServiceForm({
 // =================== INFOPRODUTOS ===================
 function InfoTab() {
   const [extraPlatforms, setExtraPlatforms] = useStorage<string[]>("d21.mn.platforms", []);
-  const [products, setProducts] = useStorage<Infoproduct[]>("d21.mn.infoproducts", []);
-  const [sales, setSales] = useStorage<Sale[]>("d21.mn.sales", []);
-  const [view, setView] = useState<"plataformas" | "produtos" | "vendas">("produtos");
+  const [view, setView] = useState<"plataformas" | "taxas">("plataformas");
 
   const platforms = [...FIXED_PLATFORMS, ...extraPlatforms];
   const addPlatform = () => {
@@ -1291,7 +1292,7 @@ function InfoTab() {
   return (
     <div className="space-y-3">
       <div className="flex gap-1 rounded-xl bg-muted p-1">
-        {(["produtos", "vendas", "plataformas"] as const).map((v) => (
+        {(["plataformas", "taxas"] as const).map((v) => (
           <button
             key={v}
             onClick={() => setView(v)}
@@ -1307,7 +1308,7 @@ function InfoTab() {
 
       {view === "plataformas" && (
         <div className="space-y-2">
-          <Button onClick={addPlatform} className="w-full bg-blue-600 hover:bg-blue-700">
+          <Button onClick={addPlatform} className="w-full bg-emerald-500 hover:bg-emerald-600">
             <Plus className="mr-1 h-4 w-4" />
             Adicionar plataforma
           </Button>
@@ -1349,10 +1350,136 @@ function InfoTab() {
         </div>
       )}
 
-      {view === "produtos" && (
-        <InfoProductsView products={products} setProducts={setProducts} platforms={platforms} />
-      )}
-      {view === "vendas" && <SalesView sales={sales} setSales={setSales} products={products} />}
+      {view === "taxas" && <TaxasView platforms={platforms} />}
+    </div>
+  );
+}
+
+type FeeMethod = { percent: number; fixed: number };
+type FeeConfig = {
+  pix?: FeeMethod;
+  credito?: FeeMethod;
+  debito?: FeeMethod;
+  boleto?: FeeMethod;
+  saque?: number;
+  liberacaoDias?: number;
+};
+
+function TaxasView({ platforms }: { platforms: string[] }) {
+  const [fees, setFees] = useStorage<Record<string, FeeConfig>>("d21.mn.platformFees", {});
+  const [active, setActive] = useState(platforms[0] ?? "");
+  const cfg = fees[active] ?? {};
+
+  const update = (patch: Partial<FeeConfig>) =>
+    setFees({ ...fees, [active]: { ...cfg, ...patch } });
+
+  const updateMethod = (m: keyof FeeConfig, patch: Partial<FeeMethod>) => {
+    const cur = (cfg[m] as FeeMethod | undefined) ?? { percent: 0, fixed: 0 };
+    update({ [m]: { ...cur, ...patch } } as Partial<FeeConfig>);
+  };
+
+  if (!platforms.length)
+    return (
+      <p className="py-6 text-center text-sm text-muted-foreground">
+        Cadastre uma plataforma primeiro.
+      </p>
+    );
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-1.5">
+        {platforms.map((p) => (
+          <button
+            key={p}
+            onClick={() => setActive(p)}
+            className={cn(
+              "rounded-full px-3 py-1 text-xs font-semibold",
+              active === p
+                ? "bg-emerald-500 text-white"
+                : "bg-muted text-muted-foreground hover:bg-muted/80",
+            )}
+          >
+            {p}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-2 rounded-2xl border bg-card p-3">
+        <p className="text-xs font-bold uppercase text-muted-foreground">Taxas por método</p>
+        {(
+          [
+            ["pix", "Pix"],
+            ["credito", "Crédito"],
+            ["debito", "Débito"],
+            ["boleto", "Boleto"],
+          ] as [keyof FeeConfig, string][]
+        ).map(([k, label]) => {
+          const m = (cfg[k] as FeeMethod | undefined) ?? { percent: 0, fixed: 0 };
+          return (
+            <div key={k} className="grid grid-cols-[80px_1fr_1fr] items-center gap-2">
+              <span className="text-xs font-semibold">{label}</span>
+              <div className="relative">
+                <Input
+                  inputMode="decimal"
+                  value={m.percent || ""}
+                  onChange={(e) =>
+                    updateMethod(k, { percent: Number(e.target.value.replace(",", ".")) || 0 })
+                  }
+                  placeholder="%"
+                  className="h-9 pr-6 text-sm"
+                />
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                  %
+                </span>
+              </div>
+              <div className="relative">
+                <span className="pointer-events-none absolute left-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                  R$
+                </span>
+                <Input
+                  inputMode="decimal"
+                  value={m.fixed || ""}
+                  onChange={(e) =>
+                    updateMethod(k, { fixed: Number(e.target.value.replace(",", ".")) || 0 })
+                  }
+                  placeholder="0,00"
+                  className="h-9 pl-7 text-sm"
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid grid-cols-2 gap-2 rounded-2xl border bg-card p-3">
+        <div>
+          <Label className="text-xs">Taxa de saque (R$)</Label>
+          <Input
+            inputMode="decimal"
+            value={cfg.saque || ""}
+            onChange={(e) => update({ saque: Number(e.target.value.replace(",", ".")) || 0 })}
+            placeholder="0,00"
+            className="mt-1 h-9 text-sm"
+          />
+        </div>
+        <div>
+          <Label className="text-xs">Liberação (dias)</Label>
+          <Input
+            inputMode="numeric"
+            value={cfg.liberacaoDias || ""}
+            onChange={(e) =>
+              update({ liberacaoDias: Number(e.target.value.replace(/\D/g, "")) || 0 })
+            }
+            placeholder="0"
+            className="mt-1 h-9 text-sm"
+          />
+        </div>
+      </div>
+
+      <p className="text-[11px] text-muted-foreground">
+        Estas taxas são usadas no cálculo automático de lucro e margem em "Nova Venda" e nos
+        Relatórios.
+      </p>
     </div>
   );
 }

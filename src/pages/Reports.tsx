@@ -30,22 +30,16 @@ import {
 } from "lucide-react";
 import { JOURNEY_DAYS } from "@/data/journey";
 
-type BizProduct = { id: string; name: string; cost: number; price: number };
-type BizService = { id: string; name: string; amount: number };
-type BizInfo = {
-  id: string;
-  name: string;
-  price: number;
-  commissionType: "percent" | "fixed";
-  commission: number;
-  platform: string;
-};
 type BizSale = {
   id: string;
-  productId: string;
-  customer: string;
+  category?: "produtos" | "servicos" | "info";
+  assetId?: string;
+  productId?: string;
   status: string;
   amount: number;
+  quantity?: number;
+  fees?: number;
+  profit?: number;
   date: string;
 };
 
@@ -69,39 +63,37 @@ const COLOR_BALANCE = "hsl(217 91% 55%)"; // azul — confiança, saldo
 const Reports = () => {
   const { transactions, totals } = useTransactions();
   const { progress } = useJourney();
-  const [bizProducts] = useStorage<BizProduct[]>("d21.mn.products", []);
-  const [bizServices] = useStorage<BizService[]>("d21.mn.services", []);
-  const [bizInfos] = useStorage<BizInfo[]>("d21.mn.infoproducts", []);
   const [bizSales] = useStorage<BizSale[]>("d21.mn.sales", []);
   const [incorporate, setIncorporate] = useStorage<boolean>("d21.mn.incorporate", false);
 
   const bizSummary = useMemo(() => {
-    const prodReceita = bizProducts.reduce((s, p) => s + p.price, 0);
-    const servReceita = bizServices.reduce((s, p) => s + p.amount, 0);
-    const infoReceitaPotencial = bizInfos.reduce(
-      (s, p) =>
-        s + (p.commissionType === "percent" ? (p.price * p.commission) / 100 : p.commission),
-      0,
-    );
-    const infoVendasPagas = bizSales.filter((s) => s.status === "Pago" && !Number.isNaN(s.amount));
-    const infoReceitaRealizada = infoVendasPagas.reduce((s, sale) => s + sale.amount, 0);
-    const infoReceita = infoReceitaRealizada || infoReceitaPotencial;
-    const margens = bizProducts
-      .filter((p) => p.cost > 0)
-      .map((p) => ((p.price - p.cost) / p.cost) * 100);
-    const margemMedia = margens.length ? margens.reduce((a, b) => a + b, 0) / margens.length : 0;
+    const paid = bizSales.filter((s) => s.status === "Pago");
+    const faturamento = paid.reduce((s, x) => s + (x.amount || 0), 0);
+    const lucro = paid.reduce((s, x) => s + (x.profit ?? x.amount ?? 0), 0);
+    const byCatMap = new Map<string, { value: number; count: number }>();
+    for (const s of paid) {
+      const cat =
+        s.category === "produtos"
+          ? "Produtos"
+          : s.category === "servicos"
+            ? "Serviços"
+            : s.category === "info"
+              ? "Infoprodutos"
+              : "Outros";
+      const cur = byCatMap.get(cat) ?? { value: 0, count: 0 };
+      cur.value += s.amount || 0;
+      cur.count += s.quantity ?? 1;
+      byCatMap.set(cat, cur);
+    }
     return {
-      total: bizProducts.length + bizServices.length + bizInfos.length,
-      receita: prodReceita + servReceita + infoReceita,
-      vendasInfo: infoVendasPagas.length,
-      margemMedia,
-      byCat: [
-        { name: "Produtos", value: prodReceita, count: bizProducts.length },
-        { name: "Serviços", value: servReceita, count: bizServices.length },
-        { name: "Infoprodutos", value: infoReceita, count: bizInfos.length },
-      ],
+      total: paid.length,
+      receita: faturamento,
+      lucro,
+      vendasInfo: paid.length,
+      margemMedia: faturamento > 0 ? (lucro / faturamento) * 100 : 0,
+      byCat: Array.from(byCatMap.entries()).map(([name, v]) => ({ name, value: v.value, count: v.count })),
     };
-  }, [bizProducts, bizServices, bizInfos, bizSales]);
+  }, [bizSales]);
 
   const displayTotals = useMemo(() => {
     if (!incorporate) return totals;
