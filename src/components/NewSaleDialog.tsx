@@ -143,6 +143,7 @@ export function NewSaleDialog({
   const [services] = useStorage<Asset[]>("d21.mn.services", []);
   const [infos] = useStorage<Asset[]>("d21.mn.infoproducts", []);
   const [sales, setSales] = useStorage<Sale[]>("d21.mn.sales", []);
+  const [customers, setCustomers] = useStorage<Customer[]>("d21.mn.customers", []);
   const [fees] = useStorage<Record<string, FeeConfig>>("d21.mn.platformFees", {});
 
   const [step, setStep] = useState(1);
@@ -153,6 +154,12 @@ export function NewSaleDialog({
   const [payment, setPayment] = useState<Payment>("Pix");
   const [amount, setAmount] = useState(0);
   const [note, setNote] = useState("");
+
+  // Cliente
+  const [cName, setCName] = useState("");
+  const [cEmail, setCEmail] = useState("");
+  const [cPhone, setCPhone] = useState("");
+  const [cDoc, setCDoc] = useState("");
 
   const assetsByCat = useMemo<Asset[]>(() => {
     if (category === "produtos") return products;
@@ -185,6 +192,10 @@ export function NewSaleDialog({
     setPayment("Pix");
     setAmount(0);
     setNote("");
+    setCName("");
+    setCEmail("");
+    setCPhone("");
+    setCDoc("");
   };
 
   const close = (o: boolean) => {
@@ -192,11 +203,50 @@ export function NewSaleDialog({
     if (!o) reset();
   };
 
-  const canStep1 = category && assetId;
+  const canStep1 = category && assetId && cName.trim().length >= 2;
   const canStep2 = baseAmount > 0;
 
   const save = () => {
     if (!category || !assetId) return;
+    if (!cName.trim()) {
+      toast.error("Informe o nome do cliente");
+      return;
+    }
+    // Atualiza/insere cliente na base local
+    let customerId: string | undefined;
+    const nowIso = new Date().toISOString();
+    const incoming = { name: cName.trim(), email: cEmail.trim() || undefined, phone: cPhone || undefined, doc: cDoc || undefined };
+    const key = customerKey(incoming);
+    setCustomers((prev) => {
+      const idx = prev.findIndex((c) => customerKey(c) === key);
+      if (idx >= 0) {
+        const updated = [...prev];
+        const cur = updated[idx];
+        customerId = cur.id;
+        updated[idx] = {
+          ...cur,
+          name: incoming.name,
+          email: incoming.email ?? cur.email,
+          phone: incoming.phone ?? cur.phone,
+          doc: incoming.doc ?? cur.doc,
+          lastSaleAt: nowIso,
+          salesCount: (cur.salesCount || 0) + 1,
+          totalSpent: (cur.totalSpent || 0) + baseAmount,
+        };
+        return updated;
+      }
+      const newC: Customer = {
+        id: crypto.randomUUID(),
+        ...incoming,
+        createdAt: nowIso,
+        lastSaleAt: nowIso,
+        salesCount: 1,
+        totalSpent: baseAmount,
+      };
+      customerId = newC.id;
+      return [newC, ...prev];
+    });
+
     const sale: Sale = {
       id: crypto.randomUUID(),
       category,
@@ -210,6 +260,11 @@ export function NewSaleDialog({
       profit: lucro,
       note: note.trim() || undefined,
       status: "Pago",
+      customerId,
+      customer: incoming.name,
+      email: incoming.email,
+      phone: incoming.phone,
+      cpf: incoming.doc,
     };
     setSales([sale, ...sales]);
     toast.success("Venda registrada");
