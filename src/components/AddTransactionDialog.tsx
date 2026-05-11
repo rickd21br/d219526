@@ -131,15 +131,15 @@ export function AddTransactionDialog({ trigger, editing, open: controlledOpen, o
     toast.success("Categoria removida");
   };
 
-  const submit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const submit = () => {
     const value = parseMaskedToNumber(amount);
     if (!value || value <= 0) { toast.error("Informe um valor válido"); return; }
     if (!group) { toast.error("Escolha um grupo"); return; }
     if (!category) { toast.error("Escolha uma categoria"); return; }
-    if (!classification) { toast.error("Classifique como Essencial, Supérfluo ou Meta"); return; }
+    const finalClassification = type === "expense" ? classification : classification ?? "E";
+    if (type === "expense" && !classification) { toast.error("Classifique como Essencial, Supérfluo ou Meta"); return; }
 
-    const payload = { type, amount: value, group, category, description: description.trim(), date, classification };
+    const payload = { type, amount: value, group, category, description: description.trim(), date, classification: finalClassification };
     if (isEditing && editing) {
       updateTransaction(editing.id, payload);
       toast.success("Transação atualizada");
@@ -172,7 +172,7 @@ export function AddTransactionDialog({ trigger, editing, open: controlledOpen, o
         <DialogHeader>
           <DialogTitle className="text-xl">{isEditing ? "Editar transação" : "Nova transação"}</DialogTitle>
         </DialogHeader>
-        <form onSubmit={submit} className="space-y-4">
+        <div className="space-y-4">
           {/* Step 1: Type */}
           <div className="grid grid-cols-2 gap-3">
             <button
@@ -371,10 +371,10 @@ export function AddTransactionDialog({ trigger, editing, open: controlledOpen, o
             />
           </div>
 
-          <Button type="submit" size="lg" className="h-12 w-full rounded-xl gradient-primary text-base font-semibold">
+          <Button type="button" onClick={submit} size="lg" className="h-12 w-full rounded-xl gradient-primary text-base font-semibold">
             {isEditing ? "Salvar alterações" : "Salvar transação"}
           </Button>
-        </form>
+        </div>
       </DialogContent>
     </Dialog>
   );

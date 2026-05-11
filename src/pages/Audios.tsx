@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MobileShell } from "@/components/MobileShell";
 import { INSPIRATION_LIBRARY, InspirationAudio, InspirationTrack } from "@/data/inspirationLibrary";
-import { Headphones, Pause, Play, ChevronDown, ListMusic, Star, Trophy, RotateCcw, LayoutGrid, Rows3, Save, MoreVertical, BookOpen } from "lucide-react";
+import { Headphones, Pause, Play, ChevronDown, ListMusic, Star, Trophy, RotateCcw, LayoutGrid, Rows3, Save, MoreVertical, BookOpen, Lock } from "lucide-react";
 import { useStorage } from "@/hooks/useStorage";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
@@ -54,6 +54,8 @@ function StarRating({ value, onChange, size = 14 }: { value: number; onChange: (
 
 function BonusAudioCard({
   item,
+  locked = false,
+  onLockedClick,
   playingId,
   currentId,
   onTrackPlay,
@@ -69,6 +71,8 @@ function BonusAudioCard({
   onSeek,
 }: {
   item: InspirationAudio;
+  locked?: boolean;
+  onLockedClick?: (item: InspirationAudio) => void;
   playingId: string | null;
   currentId?: string;
   onTrackPlay: (item: InspirationAudio, track: InspirationTrack) => void;
@@ -93,10 +97,16 @@ function BonusAudioCard({
   };
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border/70 bg-card shadow-elevated">
+    <article className={cn("overflow-hidden rounded-2xl border border-border/70 bg-card shadow-elevated", locked && "opacity-100")}>
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          if (locked) {
+            onLockedClick?.(item);
+            return;
+          }
+          setOpen((v) => !v);
+        }}
         className="group block w-full text-left"
         aria-expanded={open}
       >
@@ -105,8 +115,25 @@ function BonusAudioCard({
             src={item.cover}
             alt={`Capa do audiobook ${item.title}`}
             loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+            className={cn(
+              "h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]",
+              locked && "grayscale blur-[1px] brightness-90"
+            )}
           />
+          {locked && (
+            <div
+              className="absolute left-1/2 top-1/2 z-20 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2"
+              aria-label="Conteúdo bloqueado"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-black/45 text-white shadow-soft ring-1 ring-white/25 backdrop-blur-sm">
+                <Lock className="h-5 w-5" />
+              </span>
+
+              <span className="max-w-[180px] rounded-full bg-black/45 px-3 py-1 text-center text-[10px] font-bold leading-tight text-white shadow-soft backdrop-blur-sm">
+                Conclua o audiobook anterior
+              </span>
+            </div>
+          )}
           {completed && (
             <span className={cn(
               "absolute left-2 top-2 flex items-center justify-center rounded-full bg-amber-400 text-amber-900 shadow-glow ring-2 ring-amber-200",
@@ -132,7 +159,11 @@ function BonusAudioCard({
               "shrink-0 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow",
               isList ? "h-12 w-12" : "h-7 w-7"
             )}>
-              <ChevronDown className={cn("transition-transform duration-300", open && "rotate-180", isList ? "h-6 w-6" : "h-4 w-4")} />
+              {locked ? (
+                <Lock className={cn(isList ? "h-5 w-5" : "h-3.5 w-3.5")} />
+              ) : (
+                <ChevronDown className={cn("transition-transform duration-300", open && "rotate-180", isList ? "h-6 w-6" : "h-4 w-4")} />
+              )}
             </span>
           </div>
         </div>
@@ -169,7 +200,13 @@ function BonusAudioCard({
                           <div className="flex items-center gap-2">
                             <button
                               type="button"
-                              onClick={() => onTrackPlay(item, track)}
+                              onClick={() => {
+                                if (locked) {
+                                  onLockedClick?.(item);
+                                  return;
+                                }
+                                onTrackPlay(item, track);
+                              }}
                               aria-label={playing ? "Pausar" : "Tocar"}
                               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-glow active:scale-95"
                             >
@@ -220,7 +257,13 @@ function BonusAudioCard({
                       ) : (
                         <button
                           type="button"
-                          onClick={() => onTrackPlay(item, track)}
+                          onClick={() => {
+                              if (locked) {
+                                onLockedClick?.(item);
+                                return;
+                              }
+                              onTrackPlay(item, track);
+                            }}
                           className="flex w-full items-center gap-2 rounded-xl bg-card px-2 py-1.5 text-left transition-smooth hover:bg-card/80 active:scale-[0.98]"
                         >
                           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
@@ -383,12 +426,21 @@ const Audios = () => {
   const [speed, setSpeed] = useState(1);
   const [resumePrompt, setResumePrompt] = useState<{ track: PlayerTrack; saved: number } | null>(null);
   const [trophyBook, setTrophyBook] = useState<InspirationAudio | null>(null);
+  const [lockedBook, setLockedBook] = useState<InspirationAudio | null>(null);
   const completedRef = useRef(false);
   const [playerCollapsed, setPlayerCollapsed] = useStorage<boolean>("d21.bonusPlayerCollapsed", false);
 
   const [view, setView] = useStorage<"grid" | "list">("d21.bonusView", "list");
 
   const { savePosition, getPosition, markTrackCompleted, setRating, getRating, isBookCompleted } = useBonusProgress();
+
+  const isUnlocked = (index: number) => {
+    if (index === 0) return true;
+
+    const previousBook = INSPIRATION_LIBRARY[index - 1];
+
+    return isBookCompleted(previousBook.id);
+  };
 
   const startPlayback = (track: PlayerTrack, fromTime: number) => {
     const audio = audioRef.current;
@@ -557,10 +609,15 @@ const Audios = () => {
       </section>
 
       <section className={cn("pb-6", view === "grid" ? "grid grid-cols-3 gap-3" : "flex flex-col gap-4")}>
-        {INSPIRATION_LIBRARY.map((item) => (
+        {INSPIRATION_LIBRARY.map((item, index) => {
+          const unlocked = isUnlocked(index);
+
+          return (
           <BonusAudioCard
             key={item.id}
             item={item}
+            locked={!unlocked}
+            onLockedClick={setLockedBook}
             playingId={playingId}
             currentId={currentTrack?.id}
             onTrackPlay={selectInspirationTrack}
@@ -578,7 +635,8 @@ const Audios = () => {
             onSaveProgress={handleSaveProgress}
             onSeek={(sec) => { if (audioRef.current) audioRef.current.currentTime = sec; }}
           />
-        ))}
+          );
+        })}
       </section>
 
       <audio
@@ -638,6 +696,36 @@ const Audios = () => {
               className="flex w-full items-center justify-center gap-2 rounded-full border border-border bg-secondary px-4 py-2.5 text-sm font-bold active:scale-[0.98]"
             >
               <RotateCcw className="h-4 w-4" /> Reiniciar
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Locked audiobook info */}
+      <Dialog open={!!lockedBook} onOpenChange={(o) => !o && setLockedBook(null)}>
+        <DialogContent className="max-w-xs rounded-3xl">
+          <DialogHeader>
+            <DialogTitle className="flex flex-col items-center gap-3 text-center">
+              <span className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <Lock className="h-7 w-7" />
+              </span>
+              <span>{lockedBook?.title}</span>
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              <span className="block font-semibold text-primary">{lockedBook?.author}</span>
+              <span className="mt-3 block leading-relaxed">{lockedBook?.description}</span>
+              <span className="mt-4 block rounded-2xl bg-primary/10 p-3 text-sm font-bold text-primary">
+                Este conteúdo será liberado após a conclusão do audiobook anterior.
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <button
+              type="button"
+              onClick={() => setLockedBook(null)}
+              className="w-full rounded-full bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-glow active:scale-[0.98]"
+            >
+              Entendi
             </button>
           </DialogFooter>
         </DialogContent>
