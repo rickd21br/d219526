@@ -44,6 +44,18 @@ type SaleStatus = "Pago" | "Aguardando" | "Recusado" | "Reembolsado" | "Cancelad
 
 type Asset = { id: string; name: string; price?: number; cost?: number; amount?: number; platform?: string };
 
+export type Customer = {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  doc?: string; // CPF/CNPJ
+  createdAt: string;
+  lastSaleAt: string;
+  salesCount: number;
+  totalSpent: number;
+};
+
 type Sale = {
   id: string;
   category: SaleCategory;
@@ -57,6 +69,11 @@ type Sale = {
   profit: number;
   note?: string;
   status: SaleStatus;
+  customerId?: string;
+  customer?: string;
+  email?: string;
+  phone?: string;
+  cpf?: string;
 };
 
 type FeeMethod = { percent: number; fixed: number };
