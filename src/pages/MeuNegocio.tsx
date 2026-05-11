@@ -1130,12 +1130,9 @@ function ServiceForm({
       hireDate: new Date().toISOString().slice(0, 10),
       description: "",
       methods: ["pix"],
-      client: { name: "" },
     },
   );
   const set = <K extends keyof Service>(k: K, v: Service[K]) => setF((p) => ({ ...p, [k]: v }));
-  const setCli = <K extends keyof Contact>(k: K, v: Contact[K]) =>
-    setF((p) => ({ ...p, client: { ...(p.client || { name: "" }), [k]: v } }));
   const toggleMethod = (m: PayMethod) =>
     set("methods", f.methods.includes(m) ? f.methods.filter((x) => x !== m) : [...f.methods, m]);
 
@@ -1221,30 +1218,8 @@ function ServiceForm({
           ))}
         </div>
       </div>
-      <div className="rounded-xl border border-border p-3">
-        <p className="mb-2 text-xs font-bold uppercase text-muted-foreground">Cliente</p>
-        <div className="space-y-2">
-          <Input
-            placeholder="Nome"
-            value={f.client?.name || ""}
-            onChange={(e) => setCli("name", e.target.value)}
-          />
-          <Input
-            placeholder="Email"
-            value={f.client?.email || ""}
-            onChange={(e) => setCli("email", e.target.value)}
-          />
-          <Input
-            placeholder="Telefone"
-            value={f.client?.phone || ""}
-            onChange={(e) => setCli("phone", e.target.value)}
-          />
-          <Input
-            placeholder="Endereço"
-            value={f.client?.address || ""}
-            onChange={(e) => setCli("address", e.target.value)}
-          />
-        </div>
+      <div className="rounded-xl bg-blue-500/5 border border-blue-500/20 p-3 text-[11px] text-blue-700 dark:text-blue-300">
+        Os dados do cliente são coletados ao registrar uma <strong>venda</strong> deste serviço.
       </div>
       <Button
         className="w-full bg-blue-600 hover:bg-blue-700"

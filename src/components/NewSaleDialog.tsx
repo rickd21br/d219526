@@ -44,6 +44,18 @@ type SaleStatus = "Pago" | "Aguardando" | "Recusado" | "Reembolsado" | "Cancelad
 
 type Asset = { id: string; name: string; price?: number; cost?: number; amount?: number; platform?: string };
 
+export type Customer = {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  doc?: string; // CPF/CNPJ
+  createdAt: string;
+  lastSaleAt: string;
+  salesCount: number;
+  totalSpent: number;
+};
+
 type Sale = {
   id: string;
   category: SaleCategory;
@@ -57,6 +69,11 @@ type Sale = {
   profit: number;
   note?: string;
   status: SaleStatus;
+  customerId?: string;
+  customer?: string;
+  email?: string;
+  phone?: string;
+  cpf?: string;
 };
 
 type FeeMethod = { percent: number; fixed: number };
@@ -79,6 +96,34 @@ const parseMoney = (s: string) => {
 const maskMoney = (v: number) =>
   v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+const maskPhone = (s: string) => {
+  const d = s.replace(/\D/g, "").slice(0, 11);
+  if (!d) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+};
+
+const maskDoc = (s: string) => {
+  const d = s.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 11) {
+    return d
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  }
+  return d
+    .replace(/(\d{2})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1/$2")
+    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+};
+
+const customerKey = (c: { doc?: string; email?: string; phone?: string; name: string }) =>
+  c.doc?.replace(/\D/g, "") ||
+  c.email?.trim().toLowerCase() ||
+  (c.phone ? c.name.trim().toLowerCase() + "|" + c.phone.replace(/\D/g, "") : c.name.trim().toLowerCase());
 const CATS: { key: SaleCategory; label: string; icon: any; color: string }[] = [
   { key: "produtos", label: "Produtos", icon: Package, color: "bg-amber-500/15 text-amber-600" },
   { key: "servicos", label: "Serviços", icon: Wrench, color: "bg-blue-500/15 text-blue-600" },
@@ -98,6 +143,7 @@ export function NewSaleDialog({
   const [services] = useStorage<Asset[]>("d21.mn.services", []);
   const [infos] = useStorage<Asset[]>("d21.mn.infoproducts", []);
   const [sales, setSales] = useStorage<Sale[]>("d21.mn.sales", []);
+  const [customers, setCustomers] = useStorage<Customer[]>("d21.mn.customers", []);
   const [fees] = useStorage<Record<string, FeeConfig>>("d21.mn.platformFees", {});
 
   const [step, setStep] = useState(1);
@@ -108,6 +154,12 @@ export function NewSaleDialog({
   const [payment, setPayment] = useState<Payment>("Pix");
   const [amount, setAmount] = useState(0);
   const [note, setNote] = useState("");
+
+  // Cliente
+  const [cName, setCName] = useState("");
+  const [cEmail, setCEmail] = useState("");
+  const [cPhone, setCPhone] = useState("");
+  const [cDoc, setCDoc] = useState("");
 
   const assetsByCat = useMemo<Asset[]>(() => {
     if (category === "produtos") return products;
@@ -140,6 +192,10 @@ export function NewSaleDialog({
     setPayment("Pix");
     setAmount(0);
     setNote("");
+    setCName("");
+    setCEmail("");
+    setCPhone("");
+    setCDoc("");
   };
 
   const close = (o: boolean) => {
@@ -147,11 +203,50 @@ export function NewSaleDialog({
     if (!o) reset();
   };
 
-  const canStep1 = category && assetId;
+  const canStep1 = category && assetId && cName.trim().length >= 2;
   const canStep2 = baseAmount > 0;
 
   const save = () => {
     if (!category || !assetId) return;
+    if (!cName.trim()) {
+      toast.error("Informe o nome do cliente");
+      return;
+    }
+    // Atualiza/insere cliente na base local
+    let customerId: string | undefined;
+    const nowIso = new Date().toISOString();
+    const incoming = { name: cName.trim(), email: cEmail.trim() || undefined, phone: cPhone || undefined, doc: cDoc || undefined };
+    const key = customerKey(incoming);
+    setCustomers((prev) => {
+      const idx = prev.findIndex((c) => customerKey(c) === key);
+      if (idx >= 0) {
+        const updated = [...prev];
+        const cur = updated[idx];
+        customerId = cur.id;
+        updated[idx] = {
+          ...cur,
+          name: incoming.name,
+          email: incoming.email ?? cur.email,
+          phone: incoming.phone ?? cur.phone,
+          doc: incoming.doc ?? cur.doc,
+          lastSaleAt: nowIso,
+          salesCount: (cur.salesCount || 0) + 1,
+          totalSpent: (cur.totalSpent || 0) + baseAmount,
+        };
+        return updated;
+      }
+      const newC: Customer = {
+        id: crypto.randomUUID(),
+        ...incoming,
+        createdAt: nowIso,
+        lastSaleAt: nowIso,
+        salesCount: 1,
+        totalSpent: baseAmount,
+      };
+      customerId = newC.id;
+      return [newC, ...prev];
+    });
+
     const sale: Sale = {
       id: crypto.randomUUID(),
       category,
@@ -165,6 +260,11 @@ export function NewSaleDialog({
       profit: lucro,
       note: note.trim() || undefined,
       status: "Pago",
+      customerId,
+      customer: incoming.name,
+      email: incoming.email,
+      phone: incoming.phone,
+      cpf: incoming.doc,
     };
     setSales([sale, ...sales]);
     toast.success("Venda registrada");
@@ -369,6 +469,60 @@ export function NewSaleDialog({
                 />
                 <p className="mt-1 text-right text-[10px] text-muted-foreground">
                   {note.length}/200
+                </p>
+              </section>
+
+              {/* 4. Cliente */}
+              <section className="rounded-2xl border bg-card p-3">
+                <div className="mb-3 flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-emerald-600" />
+                  <p className="text-sm font-bold">4. Dados do cliente</p>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <Label className="text-xs">Nome *</Label>
+                    <Input
+                      value={cName}
+                      onChange={(e) => setCName(e.target.value)}
+                      placeholder="Nome completo"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs">Telefone</Label>
+                      <Input
+                        value={cPhone}
+                        onChange={(e) => setCPhone(maskPhone(e.target.value))}
+                        placeholder="(11) 99999-9999"
+                        inputMode="numeric"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">CPF / CNPJ</Label>
+                      <Input
+                        value={cDoc}
+                        onChange={(e) => setCDoc(maskDoc(e.target.value))}
+                        placeholder="000.000.000-00"
+                        inputMode="numeric"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Email</Label>
+                    <Input
+                      type="email"
+                      value={cEmail}
+                      onChange={(e) => setCEmail(e.target.value)}
+                      placeholder="cliente@email.com"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <p className="mt-2 text-[10px] text-muted-foreground">
+                  Os dados ficam salvos localmente no seu dispositivo e alimentam sua base de clientes.
                 </p>
               </section>
             </>

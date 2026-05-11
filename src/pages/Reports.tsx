@@ -1,7 +1,12 @@
 import { MobileShell } from "@/components/MobileShell";
 import { useTransactions, useJourney, formatCurrency } from "@/hooks/useFinance";
 import { useStorage } from "@/hooks/useStorage";
+import { useDay1 } from "@/hooks/useDay1";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   PieChart,
   Pie,
@@ -15,7 +20,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import {
   ArrowDownCircle,
@@ -27,8 +32,23 @@ import {
   Wrench,
   GraduationCap,
   Briefcase,
+  Users,
+  Target,
+  Pencil,
 } from "lucide-react";
 import { JOURNEY_DAYS } from "@/data/journey";
+
+type Customer = {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  doc?: string;
+  createdAt: string;
+  lastSaleAt: string;
+  salesCount: number;
+  totalSpent: number;
+};
 
 type BizSale = {
   id: string;
@@ -64,7 +84,9 @@ const Reports = () => {
   const { transactions, totals } = useTransactions();
   const { progress } = useJourney();
   const [bizSales] = useStorage<BizSale[]>("d21.mn.sales", []);
+  const [customers] = useStorage<Customer[]>("d21.mn.customers", []);
   const [incorporate, setIncorporate] = useStorage<boolean>("d21.mn.incorporate", false);
+  const day1 = useDay1();
 
   const bizSummary = useMemo(() => {
     const paid = bizSales.filter((s) => s.status === "Pago");
@@ -571,8 +593,211 @@ const Reports = () => {
           </>
         )}
       </section>
+
+      {/* Base de Clientes (gerada pelas vendas) */}
+      <section className="mt-5 rounded-3xl bg-card p-5 shadow-soft">
+        <header className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-base font-semibold">Base de clientes</h2>
+            <p className="text-xs text-muted-foreground">
+              Gerada automaticamente a partir das suas vendas (armazenada localmente).
+            </p>
+          </div>
+          <Users className="h-5 w-5 text-primary" />
+        </header>
+        {customers.length === 0 ? (
+          <p className="py-6 text-center text-sm text-muted-foreground">
+            Nenhum cliente ainda — registre uma venda em "Meu Negócio" para começar.
+          </p>
+        ) : (
+          <ul className="divide-y divide-border">
+            {customers.slice(0, 20).map((c) => (
+              <li key={c.id} className="flex items-center justify-between gap-3 py-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold">{c.name}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    {[c.phone, c.doc, c.email].filter(Boolean).join(" • ") || "—"}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-emerald-600">{formatCurrency(c.totalSpent)}</p>
+                  <p className="text-[10px] text-muted-foreground">
+                    {c.salesCount} {c.salesCount === 1 ? "compra" : "compras"}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* Onde você começou — Dia 1 */}
+      <Day1ReminderSection day1={day1} />
     </MobileShell>
   );
 };
+
+function Day1ReminderSection({ day1 }: { day1: ReturnType<typeof useDay1> }) {
+  const [editing, setEditing] = useState(false);
+  const [hasToday, setHasToday] = useState(day1.snapshot?.hasToday ?? 0);
+  const [debt, setDebt] = useState(day1.snapshot?.debt ?? 0);
+  const [income, setIncome] = useState(day1.snapshot?.monthlyIncome ?? 0);
+  const [alignment, setAlignment] = useState<"alone" | "shared">(day1.familyAlignment ?? "alone");
+  const [goal, setGoal] = useState(day1.familyGoal ?? "");
+
+  // Sync external changes when not editing
+  useEffect(() => {
+    if (editing) return;
+    setHasToday(day1.snapshot?.hasToday ?? 0);
+    setDebt(day1.snapshot?.debt ?? 0);
+    setIncome(day1.snapshot?.monthlyIncome ?? 0);
+    setAlignment(day1.familyAlignment ?? "alone");
+    setGoal(day1.familyGoal ?? "");
+  }, [day1.snapshot, day1.familyAlignment, day1.familyGoal, editing]);
+
+  const save = () => {
+    day1.saveSnapshot(Number(hasToday) || 0, Number(debt) || 0, Number(income) || 0);
+    day1.setFamily(alignment, goal.trim());
+    setEditing(false);
+  };
+
+  const hasData = !!day1.snapshot || !!day1.familyAlignment || !!day1.familyGoal;
+
+  return (
+    <section className="mt-5 rounded-3xl bg-card p-5 shadow-soft">
+      <header className="mb-3 flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold flex items-center gap-2">
+            <Target className="h-4 w-4 text-primary" /> Onde você começou
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Snapshot do Dia 1 e meta familiar — seu ponto de partida.
+          </p>
+        </div>
+        {!editing && (
+          <Button variant="ghost" size="sm" onClick={() => setEditing(true)} className="shrink-0">
+            <Pencil className="mr-1 h-3 w-3" /> Editar
+          </Button>
+        )}
+      </header>
+
+      {!hasData && !editing ? (
+        <div className="py-4 text-center">
+          <p className="text-sm text-muted-foreground">
+            Você ainda não preencheu seu snapshot do Dia 1.
+          </p>
+          <Button className="mt-3" size="sm" onClick={() => setEditing(true)}>
+            Preencher agora
+          </Button>
+        </div>
+      ) : !editing ? (
+        <>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="rounded-xl bg-emerald-500/10 p-3 text-center">
+              <p className="text-[10px] uppercase text-muted-foreground">Tinha hoje</p>
+              <p className="text-sm font-bold text-emerald-700">
+                {formatCurrency(day1.snapshot?.hasToday ?? 0)}
+              </p>
+            </div>
+            <div className="rounded-xl bg-rose-500/10 p-3 text-center">
+              <p className="text-[10px] uppercase text-muted-foreground">Dívidas</p>
+              <p className="text-sm font-bold text-rose-600">
+                {formatCurrency(day1.snapshot?.debt ?? 0)}
+              </p>
+            </div>
+            <div className="rounded-xl bg-blue-500/10 p-3 text-center">
+              <p className="text-[10px] uppercase text-muted-foreground">Renda/mês</p>
+              <p className="text-sm font-bold text-blue-700">
+                {formatCurrency(day1.snapshot?.monthlyIncome ?? 0)}
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 rounded-xl bg-muted/40 p-3">
+            <p className="text-[10px] uppercase text-muted-foreground">Alinhamento familiar</p>
+            <p className="text-sm font-semibold">
+              {day1.familyAlignment === "shared"
+                ? "Compartilhada com a família"
+                : day1.familyAlignment === "alone"
+                ? "Jornada individual"
+                : "—"}
+            </p>
+            {day1.familyGoal && (
+              <p className="mt-2 text-sm italic text-foreground">"{day1.familyGoal}"</p>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="space-y-3">
+          <div className="grid grid-cols-3 gap-2">
+            <div>
+              <Label className="text-[10px]">Tinha hoje (R$)</Label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                value={hasToday}
+                onChange={(e) => setHasToday(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label className="text-[10px]">Dívidas (R$)</Label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                value={debt}
+                onChange={(e) => setDebt(Number(e.target.value))}
+              />
+            </div>
+            <div>
+              <Label className="text-[10px]">Renda/mês (R$)</Label>
+              <Input
+                type="number"
+                inputMode="decimal"
+                value={income}
+                onChange={(e) => setIncome(Number(e.target.value))}
+              />
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">Alinhamento familiar</Label>
+            <div className="mt-1 grid grid-cols-2 gap-2">
+              {(["alone", "shared"] as const).map((opt) => (
+                <button
+                  key={opt}
+                  type="button"
+                  onClick={() => setAlignment(opt)}
+                  className={
+                    "rounded-xl border px-3 py-2 text-xs font-semibold " +
+                    (alignment === opt
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border text-muted-foreground")
+                  }
+                >
+                  {opt === "alone" ? "Individual" : "Família"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <Label className="text-xs">Meta / sonho desta jornada</Label>
+            <Textarea
+              value={goal}
+              onChange={(e) => setGoal(e.target.value.slice(0, 200))}
+              placeholder="Ex.: quitar dívidas, juntar reserva de emergência..."
+              className="mt-1 min-h-[64px]"
+            />
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={() => setEditing(false)}>
+              Cancelar
+            </Button>
+            <Button className="flex-1" onClick={save}>
+              Salvar
+            </Button>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
 
 export default Reports;
