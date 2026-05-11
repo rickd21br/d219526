@@ -1,7 +1,12 @@
 import { MobileShell } from "@/components/MobileShell";
 import { useTransactions, useJourney, formatCurrency } from "@/hooks/useFinance";
 import { useStorage } from "@/hooks/useStorage";
+import { useDay1 } from "@/hooks/useDay1";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   PieChart,
   Pie,
@@ -15,7 +20,7 @@ import {
   CartesianGrid,
   Legend,
 } from "recharts";
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { format, parseISO } from "date-fns";
 import {
   ArrowDownCircle,
@@ -27,8 +32,23 @@ import {
   Wrench,
   GraduationCap,
   Briefcase,
+  Users,
+  Target,
+  Pencil,
 } from "lucide-react";
 import { JOURNEY_DAYS } from "@/data/journey";
+
+type Customer = {
+  id: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  doc?: string;
+  createdAt: string;
+  lastSaleAt: string;
+  salesCount: number;
+  totalSpent: number;
+};
 
 type BizSale = {
   id: string;
