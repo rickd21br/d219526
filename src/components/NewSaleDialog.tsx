@@ -96,7 +96,35 @@ const parseMoney = (s: string) => {
 const maskMoney = (v: number) =>
   v.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-const CATS: { key: SaleCategory; label: string; icon: any; color: string }[] = [
+const maskPhone = (s: string) => {
+  const d = s.replace(/\D/g, "").slice(0, 11);
+  if (!d) return "";
+  if (d.length <= 2) return `(${d}`;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
+};
+
+const maskDoc = (s: string) => {
+  const d = s.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 11) {
+    return d
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d)/, "$1.$2")
+      .replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+  }
+  return d
+    .replace(/(\d{2})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1.$2")
+    .replace(/(\d{3})(\d)/, "$1/$2")
+    .replace(/(\d{4})(\d{1,2})$/, "$1-$2");
+};
+
+const customerKey = (c: { doc?: string; email?: string; phone?: string; name: string }) =>
+  c.doc?.replace(/\D/g, "") ||
+  c.email?.trim().toLowerCase() ||
+  (c.phone ? c.name.trim().toLowerCase() + "|" + c.phone.replace(/\D/g, "") : c.name.trim().toLowerCase());
+
   { key: "produtos", label: "Produtos", icon: Package, color: "bg-amber-500/15 text-amber-600" },
   { key: "servicos", label: "Serviços", icon: Wrench, color: "bg-blue-500/15 text-blue-600" },
   { key: "info", label: "Infoprodutos", icon: GraduationCap, color: "bg-violet-500/15 text-violet-600" },
