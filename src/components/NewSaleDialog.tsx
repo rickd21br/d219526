@@ -124,7 +124,7 @@ const customerKey = (c: { doc?: string; email?: string; phone?: string; name: st
   c.doc?.replace(/\D/g, "") ||
   c.email?.trim().toLowerCase() ||
   (c.phone ? c.name.trim().toLowerCase() + "|" + c.phone.replace(/\D/g, "") : c.name.trim().toLowerCase());
-
+const CATS: { key: SaleCategory; label: string; icon: any; color: string }[] = [
   { key: "produtos", label: "Produtos", icon: Package, color: "bg-amber-500/15 text-amber-600" },
   { key: "servicos", label: "Serviços", icon: Wrench, color: "bg-blue-500/15 text-blue-600" },
   { key: "info", label: "Infoprodutos", icon: GraduationCap, color: "bg-violet-500/15 text-violet-600" },
