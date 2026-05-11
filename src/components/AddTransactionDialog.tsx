@@ -136,7 +136,7 @@ export function AddTransactionDialog({ trigger, editing, open: controlledOpen, o
     if (!value || value <= 0) { toast.error("Informe um valor válido"); return; }
     if (!group) { toast.error("Escolha um grupo"); return; }
     if (!category) { toast.error("Escolha uma categoria"); return; }
-    const finalClassification = type === "expense" ? classification : classification ?? "E";
+    const finalClassification = (type === "expense" ? classification : classification ?? "E") as Classification | undefined;
     if (type === "expense" && !classification) { toast.error("Classifique como Essencial, Supérfluo ou Meta"); return; }
 
     const payload = { type, amount: value, group, category, description: description.trim(), date, classification: finalClassification };
