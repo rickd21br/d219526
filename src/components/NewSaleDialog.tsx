@@ -471,6 +471,60 @@ export function NewSaleDialog({
                   {note.length}/200
                 </p>
               </section>
+
+              {/* 4. Cliente */}
+              <section className="rounded-2xl border bg-card p-3">
+                <div className="mb-3 flex items-center gap-2">
+                  <Tag className="h-4 w-4 text-emerald-600" />
+                  <p className="text-sm font-bold">4. Dados do cliente</p>
+                </div>
+                <div className="space-y-2">
+                  <div>
+                    <Label className="text-xs">Nome *</Label>
+                    <Input
+                      value={cName}
+                      onChange={(e) => setCName(e.target.value)}
+                      placeholder="Nome completo"
+                      className="mt-1"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs">Telefone</Label>
+                      <Input
+                        value={cPhone}
+                        onChange={(e) => setCPhone(maskPhone(e.target.value))}
+                        placeholder="(11) 99999-9999"
+                        inputMode="numeric"
+                        className="mt-1"
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">CPF / CNPJ</Label>
+                      <Input
+                        value={cDoc}
+                        onChange={(e) => setCDoc(maskDoc(e.target.value))}
+                        placeholder="000.000.000-00"
+                        inputMode="numeric"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label className="text-xs">Email</Label>
+                    <Input
+                      type="email"
+                      value={cEmail}
+                      onChange={(e) => setCEmail(e.target.value)}
+                      placeholder="cliente@email.com"
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <p className="mt-2 text-[10px] text-muted-foreground">
+                  Os dados ficam salvos localmente no seu dispositivo e alimentam sua base de clientes.
+                </p>
+              </section>
             </>
           )}
 
